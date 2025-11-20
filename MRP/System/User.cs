@@ -80,7 +80,6 @@ public sealed class User: Atom, IAtom
         _EnsureAdminOrOwner(UserName);
 
         // TODO: delete user from database
-
         _EndEdit();
     }
 

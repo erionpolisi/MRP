@@ -41,7 +41,6 @@ public sealed class Session
 
     public static Session? Create(string userName, string password)
     {
-        // username/password prüfen.
 
         Session s = new(userName, password);
 
