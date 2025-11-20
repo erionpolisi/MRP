@@ -56,7 +56,8 @@ public sealed class UserHandler : Handler, IHandler
                     }
 
                     break;
-                case "/users/me" when (e.Method == HttpMethod.Get):
+
+                case "/users/login" when (e.Method == HttpMethod.Get): //TODO: Implement
                     try
                     {
                         if (e.Session is null)
@@ -86,12 +87,133 @@ public sealed class UserHandler : Handler, IHandler
                     }
 
                     break;
+
                 default:
-                    e.Respond(HttpStatusCode.BadRequest, new JsonObject() { ["success"] = false, ["reason"] = "Invalid user endpoint." });
+
+                    if (e.Path.StartsWith("/users/") 
+                    {
+                        // Teile der URL: /users/john/profile -> ["users", "john", "profile"]
+                        string[] parts = e.Path.Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+                        if (parts.Length >= 2)
+                        {
+                            string username = parts[1];
+                            string action = parts.Length > 2 ? parts[2] : ""; // profile, ratings, favorites
+
+                            //TODO: Check if Username is valid
+
+                            if (e.Method == HttpMethod.Get)
+                            {
+                                switch (action)
+                                {
+                                    case "profile":
+                                        try
+                                        {
+                                            if (e.Session is null)
+                                            {
+                                                e.Respond(HttpStatusCode.Unauthorized,
+                                                    new JsonObject() { ["success"] = false, ["reason"] = "Authentication required." });
+
+                                                Console.ForegroundColor = ConsoleColor.Red;
+                                                Console.WriteLine($"[{nameof(UserHandler)} No user in session. {e.Method} {e.Path}.");
+                                            }
+                                            else
+                                            {
+                                                // TODO: Profil-Daten von 'username' aus DB holen
+                                                e.Respond(HttpStatusCode.OK,
+                                                    new JsonObject()
+                                                    {
+                                                        ["success"] = true,
+                                                        ["username"] = username,
+                                                        ["profile"] = "hier Profildaten"
+                                                    });
+
+                                                Console.ForegroundColor = ConsoleColor.Blue;
+                                                Console.WriteLine($"[{nameof(UserHandler)} Handled {e.Method} {e.Path}.");
+                                            }
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            e.Respond(HttpStatusCode.InternalServerError,
+                                                new JsonObject() { ["success"] = false, ["reason"] = ex.Message });
+
+                                            Console.ForegroundColor = ConsoleColor.Red;
+                                            Console.WriteLine($"[{nameof(UserHandler)} Exception getting profile. {e.Method} {e.Path}: {ex.Message}");
+                                        }
+
+                                        break;
+
+                                    case "ratings":
+                                        try
+                                        {
+                                            // Ratings des Users zurückgeben
+                                            e.Respond(HttpStatusCode.OK,
+                                                new JsonObject()
+                                                {
+                                                    ["success"] = true,
+                                                    ["ratings"] = "ratingsliste"
+                                                });
+
+                                            Console.ForegroundColor = ConsoleColor.Blue;
+                                            Console.WriteLine($"[{nameof(UserHandler)} Handled {e.Method} {e.Path}.");
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            e.Respond(HttpStatusCode.InternalServerError,
+                                                new JsonObject() { ["success"] = false, ["reason"] = ex.Message });
+
+                                            Console.ForegroundColor = ConsoleColor.Red;
+                                            Console.WriteLine($"[{nameof(UserHandler)} Exception getting ratings. {e.Method} {e.Path}: {ex.Message}");
+                                        }
+
+                                        break;
+
+                                    case "favorites":
+                                        try
+                                        {
+                                            // Favoriten des Users zurückgeben
+                                            e.Respond(HttpStatusCode.OK,
+                                                new JsonObject()
+                                                {
+                                                    ["success"] = true,
+                                                    ["favorites"] = "favoritenliste"
+                                                });
+
+                                            Console.ForegroundColor = ConsoleColor.Blue;
+                                            Console.WriteLine($"[{nameof(UserHandler)} Handled {e.Method} {e.Path}.");
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            e.Respond(HttpStatusCode.InternalServerError,
+                                                new JsonObject() { ["success"] = false, ["reason"] = ex.Message });
+
+                                            Console.ForegroundColor = ConsoleColor.Red;
+                                            Console.WriteLine($"[{nameof(UserHandler)} Exception getting favorites. {e.Method} {e.Path}: {ex.Message}");
+                                        }
+
+                                        break;
+
+                                    default:
+                                        e.Respond(HttpStatusCode.NotFound,
+                                            new JsonObject() { ["success"] = false, ["reason"] = "Unknown user endpoint." });
+
+                                        Console.ForegroundColor = ConsoleColor.Red;
+                                        Console.WriteLine($"[{nameof(UserHandler)} Unknown user endpoint {e.Method} {e.Path}.");
+                                        break;
+                                }
+                            }
+
+                            break; 
+                        }
+                    }
+
+                    e.Respond(HttpStatusCode.BadRequest,
+                        new JsonObject() { ["success"] = false, ["reason"] = "Invalid user endpoint." });
 
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"[{nameof(VersionHandler)} Invalid user endpoint.");
+                    Console.WriteLine($"[{nameof(UserHandler)} Invalid user endpoint.");
                     break;
+
             }
 
             e.Responded = true;
