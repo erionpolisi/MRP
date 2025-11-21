@@ -111,7 +111,7 @@ public sealed class UserHandler : Handler, IHandler
 
                     if (e.Path.StartsWith("/users/"))
                     {
-                        // Teile der URL: /users/john/profile -> ["users", "john", "profile"]
+                        // Teilt URL: /users/john/profile -> ["users", "john", "profile"]
                         string[] parts = e.Path.Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
 
                         if (parts.Length >= 2)
