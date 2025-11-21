@@ -162,16 +162,26 @@ public sealed class UserHandler : Handler, IHandler
     private void HandleUserRecommendations(HttpRestEventArgs e, string userId)
     {
         // Query-Parameter lesen: /users/{username}/recommendations?type=genre
-        e.Query.TryGetValue("type", out var type);
 
-        if (e.Method == HttpMethod.Get)
+        e.Query.TryGetValue("type", out var type);
+        type = string.IsNullOrWhiteSpace(type) ? "genre" : type.ToLowerInvariant();
+
+        if (type != "genre" && type != "content")
         {
-            e.Respond(HttpStatusCode.OK, new JsonObject
+            e.Respond(HttpStatusCode.BadRequest, new JsonObject
             {
-                ["success"] = true,
-                ["recommendations"] = "here recommendations"
+                ["success"] = false,
+                ["reason"] = "Invalid recommendation type. Use 'genre' or 'content'."
             });
+            return;
         }
+
+        e.Respond(HttpStatusCode.OK, new JsonObject
+        {
+            ["success"] = true,
+            ["type"] = type,
+            ["recommendations"] = $"recommendations based on {type}"
+        });
     }
 
     private void HandleUserProfile(HttpRestEventArgs e, string userId)
