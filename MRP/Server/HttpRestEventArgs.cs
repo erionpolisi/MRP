@@ -2,6 +2,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json.Nodes;
+using MRP.Server.Ext;
 
 namespace MRP.Server;
 
@@ -13,6 +14,7 @@ public class HttpRestEventArgs : EventArgs
 
         Method = HttpMethod.Parse(context.Request.HttpMethod);
         Path = context.Request.Url?.AbsolutePath ?? string.Empty;
+        Query = context.Request.ParseQuery();
 
         Console.ForegroundColor = ConsoleColor.Gray;
         Console.WriteLine($"Received: {Method} {Path}");
@@ -37,6 +39,7 @@ public class HttpRestEventArgs : EventArgs
     public HttpListenerContext Context { get; }
     public HttpMethod Method { get; }
     public string Path { get; }
+    public IReadOnlyDictionary<string, string?> Query { get; private set; }
     public string Body { get; }
     public JsonObject Content { get; }
     public bool Responded { get; set; }
