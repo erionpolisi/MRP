@@ -56,7 +56,7 @@ public sealed class UserHandler : Handler, IHandler
                 return;
             }
 
-            e.Respond(HttpStatusCode.OK, new JsonObject
+            e.Respond(HttpStatusCode.Created, new JsonObject
             {
                 ["success"] = true,
                 ["message"] = message,
@@ -196,7 +196,7 @@ public sealed class UserHandler : Handler, IHandler
         }
         else if (e.Method == HttpMethod.Put)
         {
-            e.Respond(HttpStatusCode.OK, new JsonObject
+            e.Respond(HttpStatusCode.Accepted, new JsonObject
             {
                 ["success"] = true,
                 ["profile"] = "profile updated"
