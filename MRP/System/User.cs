@@ -5,6 +5,8 @@ namespace MRP.System;
 
 public sealed class User: Atom, IAtom
 {
+    public Guid Id { get; private set; } = Guid.NewGuid();
+
     private string? _UserName = null;
 
     private bool _New;

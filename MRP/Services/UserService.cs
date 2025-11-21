@@ -2,14 +2,14 @@
 
 public static class UserService
 {
-    public static (bool ok, string message, Session? session) Register(
+    public static (bool ok, string message, User user, Session? session) Register(
         string username, string fullname, string email, string password)
     {
         if (string.IsNullOrWhiteSpace(username))
-            return (false, "Username is required.", null);
+            return (false, "Username is required.", null, null)!;
 
         if (UserRepository.Exists(username)) // simulate checking in database
-            return (false, "Username already exists.", null);
+            return (false, "Username already exists.", null, null)!;
 
         var user = new User
         {
@@ -21,25 +21,25 @@ public static class UserService
         user.SetPassword(password);
         UserRepository.Add(user); // simulate saving to database
 
-        Session? session = Session.Create(username, password);
+        Session? session = Session.Create(user, password);
 
-        return (true, "User registered.", session);
+        return (true, "User registered.", user, session);
     }
 
-    public static (bool ok, string message, Session? session) Login(
+    public static (bool ok, string message, User user, Session? session) Login(
         string username, string password)
     {
         var user = UserRepository.Get(username);// simulate fetching from database
 
         if (user is null)
-            return (false, "Invalid username or password.", null);
+            return (false, "Invalid username or password.", null, null)!;
 
-        Session? session = Session.Create(username, password);
+        Session? session = Session.Create(user, password);
 
         if (session is null)
-            return (false, "Invalid username or password.", null);
+            return (false, "Invalid username or password.", null, null)!;
 
-        return (true, "Login OK.", session);
+        return (true, "Login OK.", user, session);
     }
 
 }

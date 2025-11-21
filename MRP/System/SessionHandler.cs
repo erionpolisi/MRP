@@ -36,7 +36,9 @@ public sealed class SessionHandler : Handler, IHandler
             string username = e.Content?["username"]?.GetValue<string>() ?? "";
             string password = e.Content?["password"]?.GetValue<string>() ?? "";
 
-            Session? session = Session.Create(username, password);
+            var user = UserRepository.Get(username);
+
+            Session? session = Session.Create(user, password);
 
             if (session is null)
             {
@@ -51,7 +53,8 @@ public sealed class SessionHandler : Handler, IHandler
             e.Respond(HttpStatusCode.OK, new JsonObject
             {
                 ["success"] = true,
-                ["token"] = session.Token
+                ["token"] = session.Token,
+                ["userId"] = user.Id
             });
         }
         catch (Exception ex)

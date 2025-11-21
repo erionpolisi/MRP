@@ -44,7 +44,7 @@ public sealed class UserHandler : Handler, IHandler
             string email = e.Content?["email"]?.GetValue<string>() ?? "";
             string password = e.Content?["password"]?.GetValue<string>() ?? "";
 
-            var (ok, message, session) = UserService.Register(username, fullname, email, password);
+            var (ok, message, user, session) = UserService.Register(username, fullname, email, password);
 
             if (!ok)
             {
@@ -60,7 +60,8 @@ public sealed class UserHandler : Handler, IHandler
             {
                 ["success"] = true,
                 ["message"] = message,
-                ["token"] = session?.Token ?? ""
+                ["token"] = session?.Token ?? "",
+                ["userId"] = user.Id
             });
         }
         catch (Exception ex)
@@ -83,7 +84,7 @@ public sealed class UserHandler : Handler, IHandler
             string username = e.Content?["username"]?.GetValue<string>() ?? "";
             string password = e.Content?["password"]?.GetValue<string>() ?? "";
 
-            var (ok, message, session) = UserService.Login(username, password);
+            var (ok, message, user, session) = UserService.Login(username, password);
 
             if (!ok)
             {
@@ -98,8 +99,10 @@ public sealed class UserHandler : Handler, IHandler
             e.Respond(HttpStatusCode.OK, new JsonObject
             {
                 ["success"] = true,
+                ["message"] = "hello " + username,
                 ["token"] = session!.Token,
-                ["message"] = "hello " + username
+                ["userId"] = user.Id
+
             });
         }
         catch (Exception ex)
@@ -180,6 +183,7 @@ public sealed class UserHandler : Handler, IHandler
         {
             ["success"] = true,
             ["type"] = type,
+            ["userId"] = userId,
             ["recommendations"] = $"recommendations based on {type}"
         });
     }
@@ -191,6 +195,7 @@ public sealed class UserHandler : Handler, IHandler
             e.Respond(HttpStatusCode.OK, new JsonObject
             {
                 ["success"] = true,
+                ["userId"] = userId,
                 ["profile"] = "here profile data"
             });
         }
@@ -199,6 +204,7 @@ public sealed class UserHandler : Handler, IHandler
             e.Respond(HttpStatusCode.Accepted, new JsonObject
             {
                 ["success"] = true,
+                ["userId"] = userId,
                 ["profile"] = "profile updated"
             });
         }
@@ -209,6 +215,7 @@ public sealed class UserHandler : Handler, IHandler
         e.Respond(HttpStatusCode.OK, new JsonObject
         {
             ["success"] = true,
+            ["userId"] = userId,
             ["ratings"] = "ratings list"
         });
     }
@@ -218,6 +225,7 @@ public sealed class UserHandler : Handler, IHandler
         e.Respond(HttpStatusCode.OK, new JsonObject
         {
             ["success"] = true,
+            ["userId"] = userId,
             ["favorites"] = "favorites list"
         });
     }

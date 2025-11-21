@@ -7,10 +7,11 @@ public sealed class Session
 
     private static readonly Dictionary<string, Session> _Sessions = new();
 
-    private Session(string userName, string password)
+    private Session(User user, string password)
     {
-        UserName = userName;
-        IsAdmin = (userName == "admin");
+        UserId = user.Id;
+        UserName = user.UserName;
+        IsAdmin = (UserName == "admin");
         Timestamp = DateTime.UtcNow;
 
         Token = string.Empty;
@@ -20,6 +21,7 @@ public sealed class Session
 
     public string Token { get; }
     public string UserName { get; }
+    public Guid UserId { get; }
 
     public DateTime Timestamp
     {
@@ -39,10 +41,10 @@ public sealed class Session
 
     public bool IsAdmin { get; }
 
-    public static Session? Create(string userName, string password)
+    public static Session? Create(User user, string password)
     {
 
-        Session s = new(userName, password);
+        Session s = new(user, password);
 
         lock (_Sessions)
         {
