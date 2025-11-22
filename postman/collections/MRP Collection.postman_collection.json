@@ -3,9 +3,7 @@
     "_postman_id": "70bfeea6-9c8a-4b09-8148-e6ed5034ee03",
     "name": "MRP Collection",
     "description": "Media Rating Platform API Test Collection",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "50169375",
-    "_collection_link": "https://erionpolisi-8154627.postman.co/workspace/9c74629b-dbdf-46e4-8914-9abb708a1136/collection/50169375-70bfeea6-9c8a-4b09-8148-e6ed5034ee03?action=share&source=collection_link&creator=50169375"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
@@ -27,16 +25,13 @@
                   "if (jsonData.token) pm.environment.set(\"authToken\", jsonData.token);",
                   "if (jsonData.userId) pm.environment.set(\"userId\", jsonData.userId);"
                 ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "type": "text/javascript"
               }
             }
           ],
           "id": "cd9a5daf-4f90-46d8-8666-99131e7e6799",
           "request": {
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n\"username\": \"erion\",\n\"fullname\": \"Erion Polisi\",\n\"email\": \"er.polisi@gmail.com\",\n\"password\": \"123\"\n}",
@@ -56,8 +51,7 @@
                 "register"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Login User",
@@ -74,16 +68,13 @@
                   "var jsonData = pm.response.json();",
                   "if (jsonData.token) pm.environment.set(\"authToken\", jsonData.token);"
                 ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "type": "text/javascript"
               }
             }
           ],
           "id": "48b03818-89c0-4f3b-9623-ec7463ae3714",
           "request": {
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n\"username\": \"erion\",\n\"password\": \"123\"\n}",
@@ -103,8 +94,7 @@
                 "login"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Get Profile",
@@ -128,8 +118,7 @@
                 "profile"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Get Ratings",
@@ -153,8 +142,7 @@
                 "ratings"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Get Favorites",
@@ -178,8 +166,7 @@
                 "favorites"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Get Recommendations (simple)",
@@ -203,8 +190,7 @@
                 "recommendations"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Get Recommendations (genre)",
@@ -234,8 +220,7 @@
                 }
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Get Recommendations (content)",
@@ -265,8 +250,7 @@
                 }
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Edit Profile",
@@ -298,8 +282,7 @@
                 "profile"
               ]
             }
-          },
-          "response": []
+          }
         }
       ],
       "id": "9a1e9521-9021-408f-89ee-b1b545985e00"
@@ -318,9 +301,7 @@
                   "var jsonData = pm.response.json();",
                   "if (jsonData.token) pm.environment.set(\"authToken\", jsonData.token);"
                 ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "type": "text/javascript"
               }
             }
           ],
@@ -346,8 +327,7 @@
                 "sessions"
               ]
             }
-          },
-          "response": []
+          }
         }
       ],
       "id": "640737eb-887e-4aa6-bf46-6cca847fcaa7"
@@ -367,9 +347,7 @@
                   "var json = pm.response.json();",
                   "if (json.id) pm.environment.set(\"mediaId\", json.id);"
                 ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "type": "text/javascript"
               }
             }
           ],
@@ -399,8 +377,7 @@
                 "media"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "List Media",
@@ -422,8 +399,37 @@
                 "media"
               ]
             }
-          },
-          "response": []
+          }
+        },
+        {
+          "name": "Search Media by Title",
+          "id": "media-search-title",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/media?title={{searchTitle}}",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "media"
+              ],
+              "query": [
+                {
+                  "key": "title",
+                  "value": "{{searchTitle}}"
+                }
+              ]
+            },
+            "description": "Search media entries by partial title match using the 'title' query parameter."
+          }
         },
         {
           "name": "Get Media by ID",
@@ -446,8 +452,7 @@
                 "{{mediaId}}"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Update Media",
@@ -478,8 +483,7 @@
                 "{{mediaId}}"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Delete Media",
@@ -502,8 +506,7 @@
                 "{{mediaId}}"
               ]
             }
-          },
-          "response": []
+          }
         }
       ],
       "id": "8181641d-d7f5-4f06-badb-e7091db56032"
@@ -511,23 +514,23 @@
   ],
   "variable": [
     {
-      "id": "95d10561-eee7-463b-bd8f-870d99614ba1",
+      "id": "362250f6-52a8-489d-a6ec-39e0fe0c6142",
       "key": "baseURL",
       "value": "http://localhost:8080",
       "type": "default"
     },
     {
-      "id": "91dd6b66-fd76-4138-b5a0-6c198ccf8f6e",
+      "id": "9744d82c-4734-4165-9f78-568beadb741b",
       "key": "authToken",
       "value": ""
     },
     {
-      "id": "38fac35c-a620-4db3-9137-34e8d3c4ce5d",
+      "id": "3b7e076c-2525-403c-9650-333c89da1fda",
       "key": "userId",
       "value": ""
     },
     {
-      "id": "170151b7-3188-4f8d-a737-b03f1fac9538",
+      "id": "0dfdc8b2-301f-4759-ad55-944a2f17b44a",
       "key": "mediaId",
       "value": ""
     }

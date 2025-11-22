@@ -84,7 +84,11 @@ public sealed class MediaHandler : Handler, IHandler
     // ----------------------------------------------------------
     private void HandleList(HttpRestEventArgs e)
     {
+        var titleQuery = (e.Query.TryGetValue("title", out var t) ? t : "")
+            ?.ToLowerInvariant() ?? "";
+
         var list = MediaRepository.GetAll()
+            .Where(x => x.Title.ToLowerInvariant().Contains(titleQuery))
             .Select(m => new JsonObject
             {
                 ["id"] = m.Id.ToString(),
