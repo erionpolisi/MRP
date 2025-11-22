@@ -1,0 +1,535 @@
+{
+  "info": {
+    "_postman_id": "70bfeea6-9c8a-4b09-8148-e6ed5034ee03",
+    "name": "MRP Collection",
+    "description": "Media Rating Platform API Test Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50169375",
+    "_collection_link": "https://erionpolisi-8154627.postman.co/workspace/9c74629b-dbdf-46e4-8914-9abb708a1136/collection/50169375-70bfeea6-9c8a-4b09-8148-e6ed5034ee03?action=share&source=collection_link&creator=50169375"
+  },
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "e7d027fe-e4f3-417c-99eb-ea1b3d94b4e5",
+                "exec": [
+                  "pm.test(\"Successful POST request\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) pm.environment.set(\"authToken\", jsonData.token);",
+                  "if (jsonData.userId) pm.environment.set(\"userId\", jsonData.userId);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "cd9a5daf-4f90-46d8-8666-99131e7e6799",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\"username\": \"erion\",\n\"fullname\": \"Erion Polisi\",\n\"email\": \"er.polisi@gmail.com\",\n\"password\": \"123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/users/register",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "users",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "0d2ea299-62a5-4f8e-88f0-7af9236cdd51",
+                "exec": [
+                  "pm.test(\"Successful POST request\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 401]);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) pm.environment.set(\"authToken\", jsonData.token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "48b03818-89c0-4f3b-9623-ec7463ae3714",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\"username\": \"erion\",\n\"password\": \"123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/users/login",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "users",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "id": "70b4c609-f430-4691-b24f-1ab480f5c12a",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/users/{{userId}}/profile",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Ratings",
+          "id": "1f0b07e5-6573-4723-9daf-a81abf5ed23d",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/users/{{userId}}/ratings",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "ratings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Favorites",
+          "id": "f4479601-a33a-4ca6-a48a-9a8b928e2019",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/users/{{userId}}/favorites",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "favorites"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recommendations (simple)",
+          "id": "7264434f-11c1-4ab0-9beb-60e74c4ea4f3",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/users/{{userId}}/recommendations",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "recommendations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recommendations (genre)",
+          "id": "d1d4cda7-5c8e-4231-881a-aaa5a995eb76",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/users/{{userId}}/recommendations?type=genre",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "recommendations"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "genre"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recommendations (content)",
+          "id": "aefcc201-7d97-4dab-b274-a869b81ac017",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/users/{{userId}}/recommendations?type=content",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "recommendations"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "content"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Edit Profile",
+          "id": "9b78f814-27c4-4f14-9f6d-233ef4e465b8",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\"email\": \"updated@example.com\",\n\"favoriteGenre\": \"Action\"\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/users/{{userId}}/profile",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "9a1e9521-9021-408f-89ee-b1b545985e00"
+    },
+    {
+      "name": "Session",
+      "item": [
+        {
+          "name": "Session Start",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "34839558-88f1-4215-ad9a-9235f927900e",
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) pm.environment.set(\"authToken\", jsonData.token);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "ddc68f52-1659-4bb9-921e-f1a757d198ad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\"username\": \"erion\",\n\"password\": \"123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/sessions",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "sessions"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "640737eb-887e-4aa6-bf46-6cca847fcaa7"
+    },
+    {
+      "name": "Media",
+      "item": [
+        {
+          "name": "Create Media",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "9058be8f-8d15-49ac-83c5-cbe87d810c80",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "var json = pm.response.json();",
+                  "if (json.id) pm.environment.set(\"mediaId\", json.id);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "180cf677-f9b4-4e91-916c-54126dec791e",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"The Godfather Part II\",\n  \"description\": \"Fortsetzung der Corleone-Saga über Macht, Familie und den Aufstieg von Michael sowie die Vorgeschichte von Vito.\",\n  \"mediaType\": \"Movie\",\n  \"releaseYear\": 1974,\n  \"ageRestriction\": 16,\n  \"genres\": [\"Crime\", \"Drama\", \"Gangster\", \"Epic\"]\n}\n"
+            },
+            "url": {
+              "raw": "{{baseURL}}/media",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "media"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Media",
+          "id": "56811001-a45e-4d8a-be16-ec4912e2c9ef",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/media",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "media"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Media by ID",
+          "id": "bcedd142-eb8b-491f-94a5-7e7db04e182f",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/media/{{mediaId}}",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "media",
+                "{{mediaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Media",
+          "id": "f8202034-c342-4eab-8b3f-9bceb1cf30a9",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Movie\",\n  \"description\": \"Updated description\",\n  \"mediaType\": \"Game\",\n  \"releaseYear\": 2025,\n  \"ageRestriction\": 18,\n  \"genres\": [\"Adventure\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/media/{{mediaId}}",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "media",
+                "{{mediaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Media",
+          "id": "0fbe2fe9-b93a-4c0c-ac31-9a22d891ad13",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/media/{{mediaId}}",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "media",
+                "{{mediaId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "8181641d-d7f5-4f06-badb-e7091db56032"
+    }
+  ],
+  "variable": [
+    {
+      "id": "95d10561-eee7-463b-bd8f-870d99614ba1",
+      "key": "baseURL",
+      "value": "http://localhost:8080",
+      "type": "default"
+    },
+    {
+      "id": "91dd6b66-fd76-4138-b5a0-6c198ccf8f6e",
+      "key": "authToken",
+      "value": ""
+    },
+    {
+      "id": "38fac35c-a620-4db3-9137-34e8d3c4ce5d",
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "id": "170151b7-3188-4f8d-a737-b03f1fac9538",
+      "key": "mediaId",
+      "value": ""
+    }
+  ]
+}
