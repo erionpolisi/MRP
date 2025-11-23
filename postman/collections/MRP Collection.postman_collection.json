@@ -380,7 +380,7 @@
           }
         },
         {
-          "name": "List Media",
+          "name": "List All  Media Entries",
           "id": "56811001-a45e-4d8a-be16-ec4912e2c9ef",
           "request": {
             "method": "GET",
@@ -514,23 +514,23 @@
   ],
   "variable": [
     {
-      "id": "362250f6-52a8-489d-a6ec-39e0fe0c6142",
+      "id": "4ef87056-dbc2-4a10-8b86-44c36e139561",
       "key": "baseURL",
       "value": "http://localhost:8080",
       "type": "default"
     },
     {
-      "id": "9744d82c-4734-4165-9f78-568beadb741b",
+      "id": "0f702a3d-3efd-445c-bc5b-6d58314cfaeb",
       "key": "authToken",
       "value": ""
     },
     {
-      "id": "3b7e076c-2525-403c-9650-333c89da1fda",
+      "id": "a0e0c249-7f85-4557-9c4e-28043d6dcea1",
       "key": "userId",
       "value": ""
     },
     {
-      "id": "0dfdc8b2-301f-4759-ad55-944a2f17b44a",
+      "id": "2622e49c-e31d-45e4-919b-acc61c8053e8",
       "key": "mediaId",
       "value": ""
     }
