@@ -15,7 +15,6 @@
             {
               "listen": "test",
               "script": {
-                "id": "e7d027fe-e4f3-417c-99eb-ea1b3d94b4e5",
                 "exec": [
                   "pm.test(\"Successful POST request\", function () {",
                   "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]);",
@@ -29,27 +28,16 @@
               }
             }
           ],
-          "id": "cd9a5daf-4f90-46d8-8666-99131e7e6799",
           "request": {
             "method": "POST",
             "body": {
               "mode": "raw",
-              "raw": "{\n\"username\": \"erion\",\n\"fullname\": \"Erion Polisi\",\n\"email\": \"er.polisi@gmail.com\",\n\"password\": \"123\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n\"username\": \"erion\",\n\"fullname\": \"Erion Polisi\",\n\"email\": \"er.polisi@gmail.com\",\n\"password\": \"123\"\n}"
             },
             "url": {
               "raw": "{{baseURL}}/users/register",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "users",
-                "register"
-              ]
+              "host": ["{{baseURL}}"],
+              "path": ["users", "register"]
             }
           }
         },
@@ -59,7 +47,6 @@
             {
               "listen": "test",
               "script": {
-                "id": "0d2ea299-62a5-4f8e-88f0-7af9236cdd51",
                 "exec": [
                   "pm.test(\"Successful POST request\", function () {",
                   "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 401]);",
@@ -72,200 +59,116 @@
               }
             }
           ],
-          "id": "48b03818-89c0-4f3b-9623-ec7463ae3714",
           "request": {
             "method": "POST",
             "body": {
               "mode": "raw",
-              "raw": "{\n\"username\": \"erion\",\n\"password\": \"123\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n\"username\": \"erion\",\n\"password\": \"123\"\n}"
             },
             "url": {
               "raw": "{{baseURL}}/users/login",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "users",
-                "login"
-              ]
+              "host": ["{{baseURL}}"],
+              "path": ["users", "login"]
             }
           }
         },
         {
           "name": "Get Profile",
-          "id": "70b4c609-f430-4691-b24f-1ab480f5c12a",
           "request": {
             "method": "GET",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "bearer {{authToken}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
             ],
             "url": {
               "raw": "{{baseURL}}/users/{{userId}}/profile",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "users",
-                "{{userId}}",
-                "profile"
-              ]
+              "host": ["{{baseURL}}"],
+              "path": ["users", "{{userId}}", "profile"]
             }
           }
         },
         {
           "name": "Get Ratings",
-          "id": "1f0b07e5-6573-4723-9daf-a81abf5ed23d",
           "request": {
             "method": "GET",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "bearer {{authToken}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
             ],
             "url": {
               "raw": "{{baseURL}}/users/{{userId}}/ratings",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "users",
-                "{{userId}}",
-                "ratings"
-              ]
+              "host": ["{{baseURL}}"],
+              "path": ["users", "{{userId}}", "ratings"]
             }
           }
         },
         {
           "name": "Get Favorites",
-          "id": "f4479601-a33a-4ca6-a48a-9a8b928e2019",
           "request": {
             "method": "GET",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "bearer {{authToken}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
             ],
             "url": {
               "raw": "{{baseURL}}/users/{{userId}}/favorites",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "users",
-                "{{userId}}",
-                "favorites"
-              ]
+              "host": ["{{baseURL}}"],
+              "path": ["users", "{{userId}}", "favorites"]
             }
           }
         },
         {
           "name": "Get Recommendations (simple)",
-          "id": "7264434f-11c1-4ab0-9beb-60e74c4ea4f3",
           "request": {
             "method": "GET",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "bearer {{authToken}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
             ],
             "url": {
               "raw": "{{baseURL}}/users/{{userId}}/recommendations",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "users",
-                "{{userId}}",
-                "recommendations"
-              ]
+              "host": ["{{baseURL}}"],
+              "path": ["users", "{{userId}}", "recommendations"]
             }
           }
         },
         {
           "name": "Get Recommendations (genre)",
-          "id": "d1d4cda7-5c8e-4231-881a-aaa5a995eb76",
           "request": {
             "method": "GET",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "bearer {{authToken}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
             ],
             "url": {
               "raw": "{{baseURL}}/users/{{userId}}/recommendations?type=genre",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "users",
-                "{{userId}}",
-                "recommendations"
-              ],
+              "host": ["{{baseURL}}"],
+              "path": ["users", "{{userId}}", "recommendations"],
               "query": [
-                {
-                  "key": "type",
-                  "value": "genre"
-                }
+                { "key": "type", "value": "genre" }
               ]
             }
           }
         },
         {
           "name": "Get Recommendations (content)",
-          "id": "aefcc201-7d97-4dab-b274-a869b81ac017",
           "request": {
             "method": "GET",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "bearer {{authToken}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
             ],
             "url": {
               "raw": "{{baseURL}}/users/{{userId}}/recommendations?type=content",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "users",
-                "{{userId}}",
-                "recommendations"
-              ],
+              "host": ["{{baseURL}}"],
+              "path": ["users", "{{userId}}", "recommendations"],
               "query": [
-                {
-                  "key": "type",
-                  "value": "content"
-                }
+                { "key": "type", "value": "content" }
               ]
             }
           }
         },
         {
           "name": "Edit Profile",
-          "id": "9b78f814-27c4-4f14-9f6d-233ef4e465b8",
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "bearer {{authToken}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -273,19 +176,12 @@
             },
             "url": {
               "raw": "{{baseURL}}/users/{{userId}}/profile",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "users",
-                "{{userId}}",
-                "profile"
-              ]
+              "host": ["{{baseURL}}"],
+              "path": ["users", "{{userId}}", "profile"]
             }
           }
         }
-      ],
-      "id": "9a1e9521-9021-408f-89ee-b1b545985e00"
+      ]
     },
     {
       "name": "Session",
@@ -296,7 +192,6 @@
             {
               "listen": "test",
               "script": {
-                "id": "34839558-88f1-4215-ad9a-9235f927900e",
                 "exec": [
                   "var jsonData = pm.response.json();",
                   "if (jsonData.token) pm.environment.set(\"authToken\", jsonData.token);"
@@ -305,14 +200,10 @@
               }
             }
           ],
-          "id": "ddc68f52-1659-4bb9-921e-f1a757d198ad",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -320,19 +211,14 @@
             },
             "url": {
               "raw": "{{baseURL}}/sessions",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "sessions"
-              ]
+              "host": ["{{baseURL}}"],
+              "path": ["sessions"]
             }
           }
         }
-      ],
-      "id": "640737eb-887e-4aa6-bf46-6cca847fcaa7"
+      ]
     },
-    {
+	{
       "name": "Media",
       "item": [
         {
@@ -341,7 +227,6 @@
             {
               "listen": "test",
               "script": {
-                "id": "9058be8f-8d15-49ac-83c5-cbe87d810c80",
                 "exec": [
                   "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
                   "var json = pm.response.json();",
@@ -351,123 +236,75 @@
               }
             }
           ],
-          "id": "180cf677-f9b4-4e91-916c-54126dec791e",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"The Godfather Part II\",\n  \"description\": \"Fortsetzung der Corleone-Saga über Macht, Familie und den Aufstieg von Michael sowie die Vorgeschichte von Vito.\",\n  \"mediaType\": \"Movie\",\n  \"releaseYear\": 1974,\n  \"ageRestriction\": 16,\n  \"genres\": [\"Crime\", \"Drama\", \"Gangster\", \"Epic\"]\n}\n"
+              "raw": "{\n  \"title\": \"The Godfather Part II\",\n  \"description\": \"Fortsetzung der Corleone-Saga über Macht, Familie und den Aufstieg von Michael sowie die Vorgeschichte von Vito.\",\n  \"mediaType\": \"Movie\",\n  \"releaseYear\": 1974,\n  \"ageRestriction\": 16,\n  \"genres\": [\"Crime\", \"Drama\", \"Gangster\", \"Epic\"]\n}"
             },
             "url": {
               "raw": "{{baseURL}}/media",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "media"
-              ]
+              "host": ["{{baseURL}}"],
+              "path": ["media"]
             }
           }
         },
         {
-          "name": "List All  Media Entries",
-          "id": "56811001-a45e-4d8a-be16-ec4912e2c9ef",
+          "name": "List All Media Entries",
           "request": {
             "method": "GET",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
             ],
             "url": {
               "raw": "{{baseURL}}/media",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "media"
-              ]
+              "host": ["{{baseURL}}"],
+              "path": ["media"]
             }
           }
         },
         {
           "name": "Search Media by Title",
-          "id": "media-search-title",
           "request": {
             "method": "GET",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}",
-                "type": "text"
-              }
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
             ],
             "url": {
               "raw": "{{baseURL}}/media?title={{searchTitle}}",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "media"
-              ],
+              "host": ["{{baseURL}}"],
+              "path": ["media"],
               "query": [
-                {
-                  "key": "title",
-                  "value": "{{searchTitle}}"
-                }
-              ]
-            },
-            "description": "Search media entries by partial title match using the 'title' query parameter."
-          }
-        },
-        {
-          "name": "Get Media by ID",
-          "id": "bcedd142-eb8b-491f-94a5-7e7db04e182f",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseURL}}/media/{{mediaId}}",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "media",
-                "{{mediaId}}"
+                { "key": "title", "value": "{{searchTitle}}" }
               ]
             }
           }
         },
         {
+          "name": "Get Media by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/media/{{mediaId}}",
+              "host": ["{{baseURL}}"],
+              "path": ["media", "{{mediaId}}"]
+            }
+          }
+        },
+        {
           "name": "Update Media",
-          "id": "f8202034-c342-4eab-8b3f-9bceb1cf30a9",
           "request": {
             "method": "PUT",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -475,64 +312,185 @@
             },
             "url": {
               "raw": "{{baseURL}}/media/{{mediaId}}",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "media",
-                "{{mediaId}}"
-              ]
+              "host": ["{{baseURL}}"],
+              "path": ["media", "{{mediaId}}"]
             }
           }
         },
         {
           "name": "Delete Media",
-          "id": "0fbe2fe9-b93a-4c0c-ac31-9a22d891ad13",
           "request": {
             "method": "DELETE",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}"
-              }
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
             ],
             "url": {
               "raw": "{{baseURL}}/media/{{mediaId}}",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "media",
-                "{{mediaId}}"
-              ]
+              "host": ["{{baseURL}}"],
+              "path": ["media", "{{mediaId}}"]
+            }
+          }
+        },
+        {
+          "name": "Rate Media",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stars\": 5,\n  \"comment\": \"Amazing movie!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/media/{{mediaId}}/rate",
+              "host": ["{{baseURL}}"],
+              "path": ["media", "{{mediaId}}", "rate"]
+            }
+          }
+        },
+        {
+          "name": "Favorite Media",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/media/{{mediaId}}/favorite",
+              "host": ["{{baseURL}}"],
+              "path": ["media", "{{mediaId}}", "favorite"]
+            }
+          }
+        },
+        {
+          "name": "Unfavorite Media",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/media/{{mediaId}}/favorite",
+              "host": ["{{baseURL}}"],
+              "path": ["media", "{{mediaId}}", "favorite"]
             }
           }
         }
-      ],
-      "id": "8181641d-d7f5-4f06-badb-e7091db56032"
+      ]
+    },
+    {
+      "name": "Ratings",
+      "item": [
+        {
+          "name": "Update Rating",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stars\": 4,\n  \"comment\": \"Updated review text.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseURL}}/ratings/{{ratingId}}",
+              "host": ["{{baseURL}}"],
+              "path": ["ratings", "{{ratingId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Rating",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/ratings/{{ratingId}}",
+              "host": ["{{baseURL}}"],
+              "path": ["ratings", "{{ratingId}}"]
+            }
+          }
+        },
+        {
+          "name": "Like Rating",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/ratings/{{ratingId}}/like",
+              "host": ["{{baseURL}}"],
+              "path": ["ratings", "{{ratingId}}", "like"]
+            }
+          }
+        },
+        {
+          "name": "Confirm Rating Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/ratings/{{ratingId}}/confirm",
+              "host": ["{{baseURL}}"],
+              "path": ["ratings", "{{ratingId}}", "confirm"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Leaderboard",
+      "item": [
+        {
+          "name": "Get Leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/leaderboard",
+              "host": ["{{baseURL}}"],
+              "path": ["leaderboard"]
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [
     {
-      "id": "4ef87056-dbc2-4a10-8b86-44c36e139561",
       "key": "baseURL",
-      "value": "http://localhost:8080",
-      "type": "default"
+      "value": "http://localhost:8080"
     },
     {
-      "id": "0f702a3d-3efd-445c-bc5b-6d58314cfaeb",
       "key": "authToken",
       "value": ""
     },
     {
-      "id": "a0e0c249-7f85-4557-9c4e-28043d6dcea1",
       "key": "userId",
       "value": ""
     },
     {
-      "id": "2622e49c-e31d-45e4-919b-acc61c8053e8",
       "key": "mediaId",
+      "value": ""
+    },
+    {
+      "key": "ratingId",
+      "value": ""
+    },
+    {
+      "key": "searchTitle",
       "value": ""
     }
   ]
 }
+
