@@ -164,8 +164,8 @@ public sealed class UserHandler : Handler, IHandler
 
     private void HandleUserRecommendations(HttpRestEventArgs e, string userId)
     {
-        // Query-Parameter lesen: /users/{username}/recommendations?type=genre
-        // Query-Parameter lesen: /users/{username}/recommendations?type=content
+        // Query-Parameter genre: /users/{username}/recommendations?type=genre
+        // Query-Parameter content: /users/{username}/recommendations?type=content
 
         e.Query.TryGetValue("type", out var type);
         type = string.IsNullOrWhiteSpace(type) ? "genre" : type.ToLowerInvariant();
