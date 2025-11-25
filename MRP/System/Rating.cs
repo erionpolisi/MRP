@@ -2,16 +2,19 @@
 
 public class Rating
 {
-    public Rating(User user, int stars, string? comment = null)
+    public Rating(User user, MediaEntry mediaEntry, int stars, string? comment = null)
     {
         User = user;
+        MediaEntry = mediaEntry;
         SetStars(stars);
         SetComment(comment);
     }
 
     public Guid Id { get; set; }
 
-    public User User { get; set; }
+    public User User { get; }
+
+    public MediaEntry MediaEntry { get; } 
 
     public int Stars { get; private set; }
 
@@ -21,7 +24,7 @@ public class Rating
 
     public DateTime Timestamp { get; private set; } = DateTime.UtcNow;
 
-    public HashSet<string> LikedByUsernames { get; set; } = new();
+    public HashSet<string> LikedByUsers { get; set; } = new();
 
     public void SetStars(int stars)
     {
