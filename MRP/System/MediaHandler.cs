@@ -113,28 +113,87 @@ public sealed class MediaHandler : Handler, IHandler
     // ----------------------------------------------------------
     private void HandleMediaById(HttpRestEventArgs e)
     {
-        string idPart = e.Path.Trim('/').Split('/')[1];
+        var parts = e.Path.Trim('/').Split('/');
 
-        if (!Guid.TryParse(idPart, out var id))
-        {
-            e.Respond(HttpStatusCode.BadRequest, new JsonObject
-            {
-                ["success"] = false,
-                ["reason"] = "Invalid mediaId format."
-            });
-            return;
-        }
 
-        var media = MediaRepository.Get(id);
-        if (media is null)
+
+        switch (parts.Length)
         {
-            e.Respond(HttpStatusCode.NotFound, new JsonObject
-            {
-                ["success"] = false,
-                ["reason"] = "Media not found."
-            });
-            return;
+            case 1:
+                RespondInvalidEndpoint(e);
+                break;
+            case 2:
+                HandleBasicRoute(e, parts);
+                break;
+            case 3:
+                HandleSubRoutes(e, parts);
+                break;
+            default:
+                RespondInvalidEndpoint(e);
+                break;
         }
+    }
+
+    private void HandleSubRoutes(HttpRestEventArgs e, string[] parts)
+    {
+        var idPart = parts[1];
+        var action = parts[2];
+
+        var media = GetMedia(e, idPart, out var id);
+
+        switch (action)
+        {
+            case "rate":
+                HandleRateMedia(e, media);
+                break;
+            case "favorite":
+                HandleFavoriseMedia(e, media);
+                break;
+            default:
+                RespondInvalidEndpoint(e);
+                break;
+        }
+    }
+
+    private void HandleFavoriseMedia(HttpRestEventArgs e, MediaEntry? media)
+    {
+        if (e.Method == HttpMethod.Post)
+        {
+            e.Respond(HttpStatusCode.OK, new JsonObject()
+            {
+                ["success"] = true,
+                ["message"] = "Media favorited."
+            });
+        }
+        else if (e.Method == HttpMethod.Delete)
+        {
+            e.Respond(HttpStatusCode.OK, new JsonObject()
+            {
+                ["success"] = true,
+                ["message"] = "Media unfavorited."
+            });
+        }
+        else
+        {
+            RespondInvalidEndpoint(e);
+        }
+ 
+    }
+
+    private void HandleRateMedia(HttpRestEventArgs e, MediaEntry? media)
+    {
+        e.Respond(HttpStatusCode.OK, new JsonObject()
+        {
+            ["success"] = true,
+            ["message"] = "Media rated."
+        });
+    }
+
+    private void HandleBasicRoute(HttpRestEventArgs e, string[] parts)
+    {
+        var idPart = parts[1];
+
+        var media = GetMedia(e, idPart, out var id);
 
         if (e.Method == HttpMethod.Get)
         {
@@ -152,6 +211,32 @@ public sealed class MediaHandler : Handler, IHandler
         {
             RespondInvalidEndpoint(e);
         }
+    }
+
+    private static MediaEntry? GetMedia(HttpRestEventArgs e, string idPart, out Guid id)
+    {
+        if (!Guid.TryParse(idPart, out id))
+        {
+            e.Respond(HttpStatusCode.BadRequest, new JsonObject
+            {
+                ["success"] = false,
+                ["reason"] = "Invalid mediaId format."
+            });
+            return null;
+        }
+
+        var media = MediaRepository.Get(id);
+        if (media is null)
+        {
+            e.Respond(HttpStatusCode.NotFound, new JsonObject
+            {
+                ["success"] = false,
+                ["reason"] = "Media not found."
+            });
+            return media;
+        }
+
+        return media;
     }
 
     private void HandleGet(HttpRestEventArgs e, MediaEntry media)
