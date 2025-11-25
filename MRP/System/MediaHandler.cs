@@ -85,6 +85,7 @@ public sealed class MediaHandler : Handler, IHandler
     // ----------------------------------------------------------
     private void HandleList(HttpRestEventArgs e)
     {
+        // Filter by title if provided
         var titleQuery = (e.Query.TryGetValue("title", out var t) ? t : "")
             ?.ToLowerInvariant() ?? "";
 
