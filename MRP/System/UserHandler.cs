@@ -135,12 +135,14 @@ public sealed class UserHandler : Handler, IHandler
         string userId = parts[1];
         string action = parts[2];
 
-         var userSession = UserRepository.Get(e.Session.UserName);
-
         switch (action)
         {
             case "profile":
-                HandleUserProfile(e, userId);
+                HandleProtectedUserAction(
+                    e,
+                    userId,
+                    "You are not allowed to access another user's profile.",
+                    HandleUserProfile);
                 break;
 
             case "ratings":
