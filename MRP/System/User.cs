@@ -13,7 +13,7 @@ public sealed class User: Atom, IAtom
 
     private string? _PasswordHash = null;
 
-
+    public List<Guid> FavoritedMediaIds { get; set; } = new();
 
     public User(Session? session = null)
     {

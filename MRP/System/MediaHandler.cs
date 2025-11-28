@@ -108,14 +108,9 @@ public sealed class MediaHandler : Handler, IHandler
         });
     }
 
-    // ----------------------------------------------------------
-    //      GET / PUT / DELETE — /media/{id}
-    // ----------------------------------------------------------
     private void HandleMediaById(HttpRestEventArgs e)
     {
         var parts = e.Path.Trim('/').Split('/');
-
-
 
         switch (parts.Length)
         {
@@ -123,10 +118,10 @@ public sealed class MediaHandler : Handler, IHandler
                 RespondInvalidEndpoint(e);
                 break;
             case 2:
-                HandleBasicRoute(e, parts);
+                HandleBasicRoute(e, parts); // GET / PUT / DELETE — /media/{id}
                 break;
             case 3:
-                HandleSubRoutes(e, parts);
+                HandleSubRoutes(e, parts); // /media/{id}/rate or /media/{id}/favorite
                 break;
             default:
                 RespondInvalidEndpoint(e);
@@ -157,8 +152,12 @@ public sealed class MediaHandler : Handler, IHandler
 
     private void HandleFavoriseMedia(HttpRestEventArgs e, MediaEntry? media)
     {
+        var user = UserRepository.Get(e.Session!.UserName)!;
         if (e.Method == HttpMethod.Post)
         {
+            media.FavoritedBy.Add(user);
+            user.FavoritedMediaIds.Add(media.Id);
+
             e.Respond(HttpStatusCode.OK, new JsonObject()
             {
                 ["success"] = true,
@@ -167,6 +166,9 @@ public sealed class MediaHandler : Handler, IHandler
         }
         else if (e.Method == HttpMethod.Delete)
         {
+            media.FavoritedBy.Remove(user);
+            user.FavoritedMediaIds.Remove(media.Id);
+
             e.Respond(HttpStatusCode.OK, new JsonObject()
             {
                 ["success"] = true,
@@ -182,11 +184,26 @@ public sealed class MediaHandler : Handler, IHandler
 
     private void HandleRateMedia(HttpRestEventArgs e, MediaEntry? media)
     {
-        e.Respond(HttpStatusCode.OK, new JsonObject()
+        if (e.Method != HttpMethod.Post)
         {
-            ["success"] = true,
-            ["message"] = "Media rated."
-        });
+            var user = UserRepository.Get(e.Session!.UserName)!;
+            int stars = e.Content["stars"]?.GetValue<int>() ?? 0;
+            string? comment = e.Content["comment"]?.GetValue<string>() ?? "";
+
+            var rating = new Rating(user, media, stars, comment);
+
+            media.Ratings.Add(rating);
+            e.Respond(HttpStatusCode.OK, new JsonObject()
+            {
+                ["success"] = true,
+                ["message"] = "Media rated."
+            });
+        }
+        else
+        {
+            RespondInvalidEndpoint(e);
+        }
+
     }
 
     private void HandleBasicRoute(HttpRestEventArgs e, string[] parts)

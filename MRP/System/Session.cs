@@ -41,6 +41,11 @@ public sealed class Session
 
     public bool IsAdmin { get; }
 
+    public bool CanAccessUser(Guid otherUserId)
+    {
+        return IsAdmin || UserId == otherUserId;
+    }
+
     public static Session? Create(User user, string password)
     {
 

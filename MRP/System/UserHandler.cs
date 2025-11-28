@@ -135,6 +135,8 @@ public sealed class UserHandler : Handler, IHandler
         string userId = parts[1];
         string action = parts[2];
 
+         var userSession = UserRepository.Get(e.Session.UserName);
+
         switch (action)
         {
             case "profile":
@@ -142,14 +144,27 @@ public sealed class UserHandler : Handler, IHandler
                 break;
 
             case "ratings":
-                HandleUserRatings(e, userId);
+                HandleProtectedUserAction(
+                    e,
+                    userId,
+                    "You are not allowed to access another user's ratings.",
+                    HandleUserRatings);
                 break;
 
             case "favorites":
-                HandleUserFavorites(e, userId);
+                HandleProtectedUserAction(
+                    e,
+                    userId,
+                    "You are not allowed to access another user's favorites.",
+                    HandleUserFavorites);
                 break;
+
             case "recommendations":
-                HandleUserRecommendations(e, userId);
+                HandleProtectedUserAction(
+                    e,
+                    userId,
+                    "You are not allowed to access another user's recommendations.",
+                    HandleUserRecommendations);
                 break;
 
             default:
@@ -161,6 +176,63 @@ public sealed class UserHandler : Handler, IHandler
                 break;
         }
     }
+
+    private void HandleProtectedUserAction(
+        HttpRestEventArgs e,
+        string userId,
+        string errorMessage,
+        Action<HttpRestEventArgs, string> handler)
+    {
+        if (!EnsureAccess(e, userId, errorMessage, out var guid)) return;
+
+        handler(e, userId);
+    }
+
+    private static void RespondForbidden(HttpRestEventArgs e, string reason)
+    {
+        e.Respond(HttpStatusCode.Forbidden, new JsonObject
+        {
+            ["success"] = false,
+            ["reason"] = reason
+        });
+    }
+
+    private bool EnsureAccess(HttpRestEventArgs e, string userId, string errorMessage, out Guid guid)
+    {
+        guid = Guid.Empty;
+
+        // 1. Validate GUID format
+        if (!Guid.TryParse(userId, out guid))
+        {
+            e.Respond(HttpStatusCode.BadRequest, new JsonObject
+            {
+                ["success"] = false,
+                ["reason"] = "Invalid userId format."
+            });
+            return false;
+        }
+
+        // 2. Validate existing session
+        if (e.Session is null)
+        {
+            e.Respond(HttpStatusCode.Unauthorized, new JsonObject
+            {
+                ["success"] = false,
+                ["reason"] = "Authentication required."
+            });
+            return false;
+        }
+
+        // 3. Check access rights
+        if (!e.Session.CanAccessUser(guid))
+        {
+            RespondForbidden(e, errorMessage);
+            return false;
+        }
+
+        return true;
+    }
+
 
     private void HandleUserRecommendations(HttpRestEventArgs e, string userId)
     {
@@ -227,7 +299,8 @@ public sealed class UserHandler : Handler, IHandler
         {
             ["success"] = true,
             ["userId"] = userId,
-            ["favorites"] = "favorites list"
+            ["favorites"] = "favorites "
+
         });
     }
 }
