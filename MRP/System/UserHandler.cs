@@ -204,7 +204,7 @@ public sealed class UserHandler : Handler, IHandler
         }
         else if (e.Method == HttpMethod.Put)
         {
-            e.RespondAccepted(new JsonObject
+            e.RespondOk(new JsonObject
             {
                 ["success"] = true,
                 ["userId"] = userId,

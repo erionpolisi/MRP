@@ -132,12 +132,6 @@ namespace MRP.Server.Ext
             e.Respond(HttpStatusCode.Created, jsonObject);
             e.ConsoleResponse(true, "Handled, content added.");
         }
-        
-        public static void RespondAccepted(this HttpRestEventArgs e, JsonObject jsonObject)
-        {
-            e.Respond(HttpStatusCode.Accepted, jsonObject);
-            e.ConsoleResponse(true, "Handled, content edited.");
-        }
 
         //with message//
         public static void RespondForbidden(this HttpRestEventArgs e, string message)
