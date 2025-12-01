@@ -2,6 +2,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json.Nodes;
+using MRP.Handlers;
 using MRP.Server.Ext;
 
 namespace MRP.Server;
@@ -17,7 +18,7 @@ public class HttpRestEventArgs : EventArgs
         Query = context.Request.ParseQuery();
 
         Console.ForegroundColor = ConsoleColor.Gray;
-        Console.WriteLine($"Received: {Method} {Path}");
+        Console.WriteLine($"\nReceived: {Method} {Path}");
 
         if (context.Request.HasEntityBody)
         {

@@ -1,4 +1,6 @@
 ﻿using System.Net;
+using System.Text.Json.Nodes;
+using MRP.Server.Ext;
 
 namespace MRP.Server;
 
@@ -18,6 +20,7 @@ public class HttpRestServer
     {
         _listener.Start();
         Running = true;
+        Console.ForegroundColor = ConsoleColor.Cyan;
         Console.WriteLine("[Server] Running...");
 
         while (Running)
@@ -30,8 +33,15 @@ public class HttpRestServer
                 RequestReceived?.Invoke(this, args);
 
                 if (!args.Responded)
-                    args.Respond(HttpStatusCode.NotFound,
-                        new() { ["success"] = false, ["msg"] = "Not found" });
+                {
+                    args.Respond(HttpStatusCode.NotFound, new JsonObject()
+                    {
+                        ["success"] = false, 
+                        ["message"] = "Not found"
+                    });
+                    args.SetCurrentHandler("EMPTY");
+                    args.ConsoleResponse(false, "Didn't find endpoint.");
+                }
             });
         }
     }
