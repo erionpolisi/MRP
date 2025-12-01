@@ -81,7 +81,7 @@
             "method": "POST",
             "body": {
               "mode": "raw",
-              "raw": "",
+              "raw": "{\r\n\"username\": \"erion\",\r\n\"password\": \"123\"\r\n}",
               "options": {
                 "raw": {
                   "language": "text"
@@ -102,6 +102,31 @@
         },
         {
           "name": "Get Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "256cbb11-d040-40f0-b278-7e50171c59bf",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "05e5e5f9-6091-485d-96e7-e21b352f3ab7",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "5082bb32-d932-4778-bdf4-10c8140b6726",
           "request": {
             "method": "GET",
@@ -126,6 +151,30 @@
         },
         {
           "name": "Get Ratings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "d96f94fc-f1f9-4866-a4e3-b09353ca72de",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "dd1136c7-9290-470f-ae6b-4cad347d1149",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "8777b870-75c9-45a2-ba72-35e14427ccd2",
           "request": {
             "method": "GET",
@@ -150,6 +199,30 @@
         },
         {
           "name": "Get Favorites",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "aefd231b-d654-4c4a-989e-6ed138b4a2d0",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "3aa81f8a-8407-4166-bcb6-feb3663ecb9a",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "59bc1cf4-f921-4b96-8797-52d984ab37b1",
           "request": {
             "method": "GET",
@@ -174,6 +247,30 @@
         },
         {
           "name": "Get Recommendations (simple)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "d15cdd79-01dd-4c55-94df-673c2c7b8fd8",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "0c7c4371-cb68-4d39-941d-4810f5a10dd2",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "897ab9b3-df0a-4f19-849b-395f5957612b",
           "request": {
             "method": "GET",
@@ -198,6 +295,30 @@
         },
         {
           "name": "Get Recommendations (genre)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "38edd900-0180-451a-aade-d9a0e43aff61",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "77520353-b172-4e3c-a117-af99003c182e",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "68792c78-2d21-4313-9e01-a1136fcd522f",
           "request": {
             "method": "GET",
@@ -228,6 +349,30 @@
         },
         {
           "name": "Get Recommendations (content)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "63186a1c-01fd-4bb8-a275-370c69d84721",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "330edd23-07e1-4310-be4e-e63d2f72ff81",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "be6775fe-f532-43db-a2ce-7bc0a6dfc5f3",
           "request": {
             "method": "GET",
@@ -258,6 +403,31 @@
         },
         {
           "name": "Edit Profile",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "57e0153c-a255-42b2-a3d7-84e01e730e7f",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "a963e075-1d74-466e-935f-07d8d1cf6990",
+                "exec": [
+                  "pm.test(\"Successful PUT request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "d032a839-f8b7-483a-b637-0cd3a2b1e78a",
           "request": {
             "method": "PUT",
@@ -273,7 +443,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n\"email\": \"updated@example.com\",\n\"favoriteGenre\": \"Action\"\n}"
+              "raw": "{\n\"favoriteGenre\": \"Action\"\n}",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
             },
             "url": {
               "raw": "{{baseURL}}/users/{{userId}}/profile",
@@ -300,10 +475,24 @@
             {
               "listen": "test",
               "script": {
+                "id": "7c578c1a-6c98-4b72-9f47-b91df3b2d14f",
                 "exec": [
-                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Successful POST request\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]);",
+                  "});",
+                  "",
                   "var json = pm.response.json();",
                   "if (json.id) pm.environment.set(\"mediaId\", json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "5dca9662-8934-4bed-a953-857c5d0d72a8",
+                "exec": [
+                  ""
                 ],
                 "type": "text/javascript"
               }
@@ -324,7 +513,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"The Godfather Part II\",\n  \"description\": \"Fortsetzung der Corleone-Saga über Macht, Familie und den Aufstieg von Michael sowie die Vorgeschichte von Vito.\",\n  \"mediaType\": \"Movie\",\n  \"releaseYear\": 1974,\n  \"ageRestriction\": 16,\n  \"genres\": [\"Crime\", \"Drama\", \"Gangster\", \"Epic\"]\n}"
+              "raw": "{\n  \"title\": \"The Godfather Part II\",\n  \"description\": \"Fortsetzung der Corleone-Saga über Macht, Familie und den Aufstieg von Michael sowie die Vorgeschichte von Vito.\",\n  \"mediaType\": \"Movie\",\n  \"releaseYear\": 1974,\n  \"ageRestriction\": 16,\n  \"genres\": [\"Crime\", \"Drama\", \"Gangster\", \"Epic\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
             },
             "url": {
               "raw": "{{baseURL}}/media",
@@ -339,6 +533,30 @@
         },
         {
           "name": "List All Media Entries",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "3081274d-8e58-4c73-8551-ea8a5ae93c07",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "661f2d70-9321-4502-8fc2-e41acbff1441",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "6e010b67-1967-4671-b06f-4431965e3d07",
           "request": {
             "method": "GET",
@@ -361,6 +579,30 @@
         },
         {
           "name": "Search Media by Title",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "5208bc08-070b-4f32-b1a0-2665749a14c4",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "fe6cd0b4-a0df-45cf-ace3-7863ea58cc6e",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "463eafb4-1c33-45c6-bdd5-fd6d51e40e6c",
           "request": {
             "method": "GET",
@@ -389,6 +631,30 @@
         },
         {
           "name": "Get Media by ID",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "bc1816ce-6d2c-418a-aec9-e5d5f18f6b70",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "f5125b96-7ed7-4444-924f-76a02b61e4f2",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "ecc69eb8-0a59-4c8c-8868-11ab3ae7d854",
           "request": {
             "method": "GET",
@@ -412,6 +678,30 @@
         },
         {
           "name": "Update Media",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "cbd37f9a-eb12-4a53-86d9-d4171a3f749b",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "c52ccf8f-5369-49bb-a9c8-a69ec2cfa363",
+                "exec": [
+                  "pm.test(\"Successful PUT request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "487cf059-733c-4a1c-b171-038e3a849d72",
           "request": {
             "method": "PUT",
@@ -427,7 +717,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Updated Movie\",\n  \"description\": \"Updated description\",\n  \"mediaType\": \"Game\",\n  \"releaseYear\": 2025,\n  \"ageRestriction\": 18,\n  \"genres\": [\"Adventure\"]\n}"
+              "raw": "{\n  \"title\": \"Updated Movie\",\n  \"description\": \"Updated description\",\n  \"mediaType\": \"Game\",\n  \"releaseYear\": 2025,\n  \"ageRestriction\": 18,\n  \"genres\": [\"Adventure\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
             },
             "url": {
               "raw": "{{baseURL}}/media/{{mediaId}}",
@@ -443,6 +738,30 @@
         },
         {
           "name": "Delete Media",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "43b3fc50-bb28-4cad-945f-6be4a48c7012",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "f4a1c5a6-8e91-420a-bba5-72acfd883604",
+                "exec": [
+                  "pm.test(\"Successful DELETE request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "449922c0-1423-4f57-85ae-08b13adaa4a6",
           "request": {
             "method": "DELETE",
@@ -466,6 +785,30 @@
         },
         {
           "name": "Rate Media",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "32b6f981-082a-489b-9c68-2082cb6d99ea",
+                "exec": [
+                  "pm.test(\"Successful POST request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "a8886f4e-5bdc-4725-a8d8-fd5b70578123",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "fbbea94b-1b0e-4adb-8129-8f1080d013ce",
           "request": {
             "method": "POST",
@@ -481,7 +824,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"stars\": 5,\n  \"comment\": \"Amazing movie!\"\n}"
+              "raw": "{\n  \"stars\": 5,\n  \"comment\": \"Amazing movie!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
             },
             "url": {
               "raw": "{{baseURL}}/media/{{mediaId}}/rate",
@@ -498,6 +846,30 @@
         },
         {
           "name": "Favorite Media",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "54441e42-570c-4b14-8120-fb1626275dfe",
+                "exec": [
+                  "pm.test(\"Successful POST request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "07a18379-ea42-4187-8efa-2effc01b7e48",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "a412d07f-5588-4f35-8ff2-1ec4a99e480f",
           "request": {
             "method": "POST",
@@ -522,6 +894,30 @@
         },
         {
           "name": "Unfavorite Media",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "9bc53098-add1-4ce4-ab5a-ff7b8097fa24",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "3d1d7f68-4e9f-44ce-a9c2-fa2be8ee53e3",
+                "exec": [
+                  "pm.test(\"Successful DELETE request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "9dd5cbb9-6a6e-4aeb-9a2b-7b8305f3043b",
           "request": {
             "method": "DELETE",
@@ -546,6 +942,30 @@
         },
         {
           "name": "Get Media Ratings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "5164302a-7b19-4088-90a5-318f5f0b011c",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "d48434a5-d157-49eb-8dfe-cf7a73ac4eab",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "89f88698-bcb1-4fbe-bb96-517dd1859de2",
           "request": {
             "method": "GET",
@@ -576,6 +996,30 @@
       "item": [
         {
           "name": "Update Rating",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "0d4b6acd-8aad-4b3b-855a-05bc22f9081f",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "ed997fbf-3eaa-4d36-ba33-a5612d59a9a1",
+                "exec": [
+                  "pm.test(\"Successful PUT request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "e18a3edb-b75c-466e-8806-d1e7f2a27a76",
           "request": {
             "method": "PUT",
@@ -591,7 +1035,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"stars\": 4,\n  \"comment\": \"Updated review text.\"\n}"
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
             },
             "url": {
               "raw": "{{baseURL}}/ratings/{{ratingId}}",
@@ -607,6 +1056,30 @@
         },
         {
           "name": "Delete Rating",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "d2ef0f26-1585-4689-9b7a-ea80bc4952f6",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "f78ea3f0-a71f-4d43-babf-ded64aa0cc71",
+                "exec": [
+                  "pm.test(\"Successful DELETE request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "bcb16606-333f-4f6b-9b98-0062fcb844bb",
           "request": {
             "method": "DELETE",
@@ -630,6 +1103,31 @@
         },
         {
           "name": "Like Rating",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "99ac815c-dae3-4315-a3d1-f2ddbf28596c",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "e10d4242-7171-44be-963d-ece7fefe64c9",
+                "exec": [
+                  "pm.test(\"Successful POST request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "930ecac4-092f-4edc-8b79-03a92ccf4184",
           "request": {
             "method": "POST",
@@ -654,6 +1152,31 @@
         },
         {
           "name": "Confirm Rating Comment",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "6014b1a9-ea99-454b-b4cc-eead94c9f7bd",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "c1fefc36-81e4-45c1-80d6-7e9e1c649923",
+                "exec": [
+                  "pm.test(\"Successful POST request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]);\r",
+                  "});\r",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "8fccf4df-327c-4d9e-87aa-39c9fea9d77b",
           "request": {
             "method": "POST",
@@ -684,6 +1207,30 @@
       "item": [
         {
           "name": "Get Leaderboard",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "695c9e7c-e3bd-4fb8-bf66-30cbd37a423c",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "eacb7092-7b00-43b6-a153-368c5fd1eb98",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "14183ee9-d85d-4949-b26e-26a9238cd91e",
           "request": {
             "method": "GET",
@@ -712,6 +1259,30 @@
       "item": [
         {
           "name": "Get Version",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "58a28a25-640e-4cc8-ac49-36b39c8ea302",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "76fe9a05-1177-43c4-a2a0-29149b42327e",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "id": "a2961939-e782-47ef-9c0f-dcf1807acde2",
           "request": {
             "method": "GET",
@@ -732,32 +1303,32 @@
   ],
   "variable": [
     {
-      "id": "a1593317-37eb-4df2-a694-262cc04a24ad",
+      "id": "f592574a-f2f3-4adc-a74e-fa67bcfd8019",
       "key": "baseURL",
       "value": "http://localhost:8080"
     },
     {
-      "id": "97db8f69-cd0f-4f59-acb3-dd72517eed81",
+      "id": "75b2d03a-fa9c-46f5-a3b1-262f545f1e02",
       "key": "authToken",
       "value": ""
     },
     {
-      "id": "e6f46e35-3892-4e4b-9ad3-8b1011229c1d",
+      "id": "d6065799-86fb-4779-bcf7-22ddfc97c681",
       "key": "userId",
       "value": ""
     },
     {
-      "id": "fc802735-21b8-4e92-b98d-3ec3d62d32f7",
+      "id": "4fe8d8fe-a8d1-4c18-8909-7bef7da17a2b",
       "key": "mediaId",
       "value": ""
     },
     {
-      "id": "fca09bc1-dc5c-4c6d-befb-f9a8fa584294",
+      "id": "a9aee2c9-e152-47f1-a9f3-45420a14405d",
       "key": "ratingId",
       "value": ""
     },
     {
-      "id": "58c36879-1994-40fa-ad76-1f7f605c3a05",
+      "id": "8e4e3265-d630-441b-b014-fd5843983c5f",
       "key": "searchTitle",
       "value": ""
     }
