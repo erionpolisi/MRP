@@ -10,7 +10,7 @@ public class Rating
         SetComment(comment);
     }
 
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     public User User { get; }
 
