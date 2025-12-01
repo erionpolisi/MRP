@@ -1,7 +1,6 @@
 ﻿using MRP.Handlers;
 using MRP.Server;
 using MRP.Server.Ext;
-using System.Net;
 using System.Text.Json.Nodes;
 using MRP.Services;
 
@@ -14,8 +13,10 @@ public sealed class MediaHandler : Handler, IHandler
         if (!e.Path.StartsWith("/media"))
             return;
 
-        if (!e.VerifyAuthentication())
+        if (!e.VerifySession())
             return;
+
+        e.SetCurrentHandler(nameof(MediaHandler));
 
         if (e.Path == "/media" && e.Method == HttpMethod.Post)
         {
@@ -31,7 +32,7 @@ public sealed class MediaHandler : Handler, IHandler
         }
         else
         {
-            RespondInvalidEndpoint(e);
+            e.RespondInvalidEndpoint();
         }
 
         e.Responded = true;
@@ -64,7 +65,7 @@ public sealed class MediaHandler : Handler, IHandler
 
             MediaRepository.Add(entry);
 
-            e.Respond(HttpStatusCode.Created, new JsonObject
+            e.RespondCreated(new JsonObject
             {
                 ["success"] = true,
                 ["id"] = entry.Id.ToString()
@@ -72,11 +73,7 @@ public sealed class MediaHandler : Handler, IHandler
         }
         catch (Exception ex)
         {
-            e.Respond(HttpStatusCode.InternalServerError, new JsonObject
-            {
-                ["success"] = false,
-                ["reason"] = ex.Message
-            });
+            e.RespondInternalServerError(ex);
         }
     }
 
@@ -101,7 +98,7 @@ public sealed class MediaHandler : Handler, IHandler
 
         var json = new JsonArray(list.ToArray());
 
-        e.Respond(HttpStatusCode.OK, new JsonObject
+        e.RespondOk(new JsonObject
         {
             ["success"] = true,
             ["media"] = json
@@ -115,7 +112,7 @@ public sealed class MediaHandler : Handler, IHandler
         switch (parts.Length)
         {
             case 1:
-                RespondInvalidEndpoint(e);
+                e.RespondInvalidEndpoint();
                 break;
             case 2:
                 HandleBasicRoute(e, parts); // GET / PUT / DELETE — /media/{id}
@@ -124,7 +121,7 @@ public sealed class MediaHandler : Handler, IHandler
                 HandleSubRoutes(e, parts); // /media/{id}/rate or /media/{id}/favorite
                 break;
             default:
-                RespondInvalidEndpoint(e);
+                e.RespondInvalidEndpoint();
                 break;
         }
     }
@@ -135,19 +132,33 @@ public sealed class MediaHandler : Handler, IHandler
         var action = parts[2];
 
         var media = GetMedia(e, idPart, out var id);
+        if (media is null)
+            return;
 
         switch (action)
         {
-            case "rate":
+            case "rate" when e.Method == HttpMethod.Post:
                 HandleRateMedia(e, media);
                 break;
-            case "favorite":
+            case "ratings" when e.Method == HttpMethod.Get:
+                HandleRatingsMedia(e, media);
+                break;
+            case "favorite" when e.Method == HttpMethod.Post || e.Method == HttpMethod.Delete:
                 HandleFavoriseMedia(e, media);
                 break;
             default:
-                RespondInvalidEndpoint(e);
+                e.RespondInvalidEndpoint();
                 break;
         }
+    }
+
+    private void HandleRatingsMedia(HttpRestEventArgs e, MediaEntry media)
+    {
+            e.RespondOk(new JsonObject()
+            {
+                ["success"] = true,
+                ["ratings"] = "ratings from media."
+            });
     }
 
     private void HandleFavoriseMedia(HttpRestEventArgs e, MediaEntry? media)
@@ -158,10 +169,10 @@ public sealed class MediaHandler : Handler, IHandler
             media.FavoritedBy.Add(user);
             user.FavoritedMediaIds.Add(media.Id);
 
-            e.Respond(HttpStatusCode.OK, new JsonObject()
+            e.RespondOk(new JsonObject()
             {
                 ["success"] = true,
-                ["message"] = "Media favorited."
+                ["message"] = "Media set as favorite."
             });
         }
         else if (e.Method == HttpMethod.Delete)
@@ -169,23 +180,16 @@ public sealed class MediaHandler : Handler, IHandler
             media.FavoritedBy.Remove(user);
             user.FavoritedMediaIds.Remove(media.Id);
 
-            e.Respond(HttpStatusCode.OK, new JsonObject()
+            e.RespondOk(new JsonObject()
             {
                 ["success"] = true,
                 ["message"] = "Media unfavorited."
             });
         }
-        else
-        {
-            RespondInvalidEndpoint(e);
-        }
- 
     }
 
     private void HandleRateMedia(HttpRestEventArgs e, MediaEntry? media)
     {
-        if (e.Method != HttpMethod.Post)
-        {
             var user = UserRepository.Get(e.Session!.UserName)!;
             int stars = e.Content["stars"]?.GetValue<int>() ?? 0;
             string? comment = e.Content["comment"]?.GetValue<string>() ?? "";
@@ -193,17 +197,11 @@ public sealed class MediaHandler : Handler, IHandler
             var rating = new Rating(user, media, stars, comment);
 
             media.Ratings.Add(rating);
-            e.Respond(HttpStatusCode.OK, new JsonObject()
+            e.RespondOk(new JsonObject()
             {
                 ["success"] = true,
                 ["message"] = "Media rated."
             });
-        }
-        else
-        {
-            RespondInvalidEndpoint(e);
-        }
-
     }
 
     private void HandleBasicRoute(HttpRestEventArgs e, string[] parts)
@@ -226,7 +224,7 @@ public sealed class MediaHandler : Handler, IHandler
         }
         else
         {
-            RespondInvalidEndpoint(e);
+            e.RespondInvalidEndpoint();
         }
     }
 
@@ -234,23 +232,15 @@ public sealed class MediaHandler : Handler, IHandler
     {
         if (!Guid.TryParse(idPart, out id))
         {
-            e.Respond(HttpStatusCode.BadRequest, new JsonObject
-            {
-                ["success"] = false,
-                ["reason"] = "Invalid mediaId format."
-            });
+            e.RespondBadRequest("Invalid mediaId format.");
             return null;
         }
 
         var media = MediaRepository.Get(id);
         if (media is null)
         {
-            e.Respond(HttpStatusCode.NotFound, new JsonObject
-            {
-                ["success"] = false,
-                ["reason"] = "Media not found."
-            });
-            return media;
+            e.RespondNotFound("Media not found.");
+            return null;
         }
 
         return media;
@@ -258,7 +248,7 @@ public sealed class MediaHandler : Handler, IHandler
 
     private void HandleGet(HttpRestEventArgs e, MediaEntry media)
     {
-        e.Respond(HttpStatusCode.OK, new JsonObject
+        e.RespondOk(new JsonObject
         {
             ["success"] = true,
             ["id"] = media.Id.ToString(),
@@ -293,7 +283,7 @@ public sealed class MediaHandler : Handler, IHandler
 
         media.AgeRestriction = e.Content["ageRestriction"]?.GetValue<int>() ?? media.AgeRestriction;
 
-        e.Respond(HttpStatusCode.OK, new JsonObject
+        e.RespondOk(new JsonObject
         {
             ["success"] = true,
             ["message"] = "Media updated."
@@ -303,15 +293,6 @@ public sealed class MediaHandler : Handler, IHandler
     private void HandleDelete(HttpRestEventArgs e, Guid id)
     {
         MediaRepository.Delete(id);
-        e.Respond(HttpStatusCode.NoContent, new JsonObject());
-    }
-
-    private void RespondInvalidEndpoint(HttpRestEventArgs e)
-    {
-        e.Respond(HttpStatusCode.BadRequest, new JsonObject
-        {
-            ["success"] = false,
-            ["reason"] = "Invalid media endpoint."
-        });
+        e.RespondNoContent();
     }
 }

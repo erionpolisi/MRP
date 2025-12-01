@@ -13,6 +13,8 @@ public sealed class UserHandler : Handler, IHandler
         if (!e.Path.StartsWith("/users"))
             return;
 
+        e.SetCurrentHandler(nameof(UserHandler));
+
         switch (e.Path)
         {
             case "/users/register" when e.Method == HttpMethod.Post:
@@ -24,7 +26,7 @@ public sealed class UserHandler : Handler, IHandler
                 break;
 
             default:
-                if (!e.VerifyAuthentication()) return;
+                if (!e.VerifySession()) return;
                 HandleUserSubRoutes(e);
                 break;
         }
@@ -48,15 +50,11 @@ public sealed class UserHandler : Handler, IHandler
 
             if (!ok)
             {
-                e.Respond(HttpStatusCode.Conflict, new JsonObject
-                {
-                    ["success"] = false,
-                    ["reason"] = message
-                });
+                e.RespondConflict(message);
                 return;
             }
 
-            e.Respond(HttpStatusCode.Created, new JsonObject
+            e.RespondCreated(new JsonObject
             {
                 ["success"] = true,
                 ["message"] = message,
@@ -66,11 +64,7 @@ public sealed class UserHandler : Handler, IHandler
         }
         catch (Exception ex)
         {
-            e.Respond(HttpStatusCode.InternalServerError, new JsonObject
-            {
-                ["success"] = false,
-                ["reason"] = ex.Message
-            });
+            e.RespondInternalServerError(ex);
         }
     }
 
@@ -88,15 +82,11 @@ public sealed class UserHandler : Handler, IHandler
 
             if (!ok)
             {
-                e.Respond(HttpStatusCode.Unauthorized, new JsonObject
-                {
-                    ["success"] = false,
-                    ["reason"] = message
-                });
+                e.RespondUnauthorized();
                 return;
             }
 
-            e.Respond(HttpStatusCode.OK, new JsonObject
+            e.RespondOk(new JsonObject
             {
                 ["success"] = true,
                 ["message"] = "hello " + username,
@@ -107,11 +97,7 @@ public sealed class UserHandler : Handler, IHandler
         }
         catch (Exception ex)
         {
-            e.Respond(HttpStatusCode.InternalServerError, new JsonObject
-            {
-                ["success"] = false,
-                ["reason"] = ex.Message
-            });
+            e.RespondInternalServerError(ex);
         }
     }
 
@@ -124,11 +110,7 @@ public sealed class UserHandler : Handler, IHandler
 
         if (parts.Length < 3)
         {
-            e.Respond(HttpStatusCode.BadRequest, new JsonObject
-            {
-                ["success"] = false,
-                ["reason"] = "Invalid user endpoint."
-            });
+            e.RespondInvalidEndpoint();
             return;
         }
 
@@ -170,11 +152,7 @@ public sealed class UserHandler : Handler, IHandler
                 break;
 
             default:
-                e.Respond(HttpStatusCode.NotFound, new JsonObject
-                {
-                    ["success"] = false,
-                    ["reason"] = "Unknown user endpoint."
-                });
+                e.RespondInvalidEndpoint();
                 break;
         }
     }
@@ -185,56 +163,10 @@ public sealed class UserHandler : Handler, IHandler
         string errorMessage,
         Action<HttpRestEventArgs, string> handler)
     {
-        if (!EnsureAccess(e, userId, errorMessage, out var guid)) return;
+        if (!e.EnsureAccess(userId, errorMessage, out var guid)) return;
 
         handler(e, userId);
     }
-
-    private static void RespondForbidden(HttpRestEventArgs e, string reason)
-    {
-        e.Respond(HttpStatusCode.Forbidden, new JsonObject
-        {
-            ["success"] = false,
-            ["reason"] = reason
-        });
-    }
-
-    private bool EnsureAccess(HttpRestEventArgs e, string userId, string errorMessage, out Guid guid)
-    {
-        guid = Guid.Empty;
-
-        // 1. Validate GUID format
-        if (!Guid.TryParse(userId, out guid))
-        {
-            e.Respond(HttpStatusCode.BadRequest, new JsonObject
-            {
-                ["success"] = false,
-                ["reason"] = "Invalid userId format."
-            });
-            return false;
-        }
-
-        // 2. Validate existing session
-        if (e.Session is null)
-        {
-            e.Respond(HttpStatusCode.Unauthorized, new JsonObject
-            {
-                ["success"] = false,
-                ["reason"] = "Authentication required."
-            });
-            return false;
-        }
-
-        // 3. Check access rights
-        if (!e.Session.CanAccessUser(guid))
-        {
-            RespondForbidden(e, errorMessage);
-            return false;
-        }
-
-        return true;
-    }
-
 
     private void HandleUserRecommendations(HttpRestEventArgs e, string userId)
     {
@@ -246,15 +178,11 @@ public sealed class UserHandler : Handler, IHandler
 
         if (type != "genre" && type != "content")
         {
-            e.Respond(HttpStatusCode.BadRequest, new JsonObject
-            {
-                ["success"] = false,
-                ["reason"] = "Invalid recommendation type. Use 'genre' or 'content'."
-            });
+            e.RespondBadRequest("Invalid recommendation type. Use 'genre' or 'content'.");
             return;
         }
 
-        e.Respond(HttpStatusCode.OK, new JsonObject
+        e.RespondOk(new JsonObject
         {
             ["success"] = true,
             ["type"] = type,
@@ -267,7 +195,7 @@ public sealed class UserHandler : Handler, IHandler
     {
         if (e.Method == HttpMethod.Get)
         {
-            e.Respond(HttpStatusCode.OK, new JsonObject
+            e.RespondOk(new JsonObject
             {
                 ["success"] = true,
                 ["userId"] = userId,
@@ -276,7 +204,7 @@ public sealed class UserHandler : Handler, IHandler
         }
         else if (e.Method == HttpMethod.Put)
         {
-            e.Respond(HttpStatusCode.Accepted, new JsonObject
+            e.RespondAccepted(new JsonObject
             {
                 ["success"] = true,
                 ["userId"] = userId,
@@ -287,7 +215,7 @@ public sealed class UserHandler : Handler, IHandler
 
     private void HandleUserRatings(HttpRestEventArgs e, string userId)
     {
-        e.Respond(HttpStatusCode.OK, new JsonObject
+        e.RespondOk(new JsonObject
         {
             ["success"] = true,
             ["userId"] = userId,
@@ -297,12 +225,11 @@ public sealed class UserHandler : Handler, IHandler
 
     private void HandleUserFavorites(HttpRestEventArgs e, string userId)
     {
-        e.Respond(HttpStatusCode.OK, new JsonObject
+        e.RespondOk(new JsonObject
         {
             ["success"] = true,
             ["userId"] = userId,
             ["favorites"] = "favorites "
-
         });
     }
 }
