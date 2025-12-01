@@ -210,21 +210,23 @@ public sealed class MediaHandler : Handler, IHandler
 
         var media = GetMedia(e, idPart, out var id);
 
-        if (e.Method == HttpMethod.Get)
+        if (media is null)
+            return;
+
+        switch (e.Method.Method)
         {
-            HandleGet(e, media);
-        }
-        else if (e.Method == HttpMethod.Put)
-        {
-            HandleUpdate(e, media);
-        }
-        else if (e.Method == HttpMethod.Delete)
-        {
-            HandleDelete(e, id);
-        }
-        else
-        {
-            e.RespondInvalidEndpoint();
+            case "GET":
+                HandleGet(e, media);
+                break;
+            case "PUT":
+                HandleUpdate(e, media);
+                break;
+            case "DELETE":
+                HandleDelete(e, id);
+                break;
+            default:
+                e.RespondInvalidEndpoint();
+                break;
         }
     }
 
