@@ -32,9 +32,9 @@ public static class UserService
         var user = UserRepository.Get(username);// simulate fetching from database
 
         if (user is null)
-            return (false, "Invalid username or password.", null, null)!;
+            return (false, "Invalid username", null, null)!;
 
-        Session? session = Session.Create(user, password);
+        Session? session = Session.Create(user, password); //password not validated yet, create session
 
         if (session is null)
             return (false, "Invalid username or password.", null, null)!;
