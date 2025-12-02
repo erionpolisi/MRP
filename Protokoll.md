@@ -1,5 +1,6 @@
 # Media Ratings Platform (MRP) – Intermediate Submission  
 Author: Erion Polisi
+
 GitHub: https://github.com/erionpolisi/MRP.git
 
 ---
@@ -7,7 +8,9 @@ GitHub: https://github.com/erionpolisi/MRP.git
 # 1. Projektübersicht
 
 Dieses Projekt implementiert einen reinen HTTP/REST-Server (ohne Frameworks wie ASP.NET) zur Verwaltung einer Media Ratings Platform (MRP).  
-Der Server bietet grundlegende User-Authentifizierung (Registration, Login, Token-System) sowie CRUD-Verwaltung von Media-Einträgen.  
+Der Server bietet grundlegende User-Authentifizierung (Registration, Login, Token-System) sowie CRUD-Verwaltung von Media-Einträgen.
+Responses werden konsistent über Erweiterungsmethoden (RespondXXX) verarbeitet.
+Eine interne Session-Logik prüft Autorisierung vor allen geschützten Endpunkten.
 Diese Abgabe entspricht vollständig den **Intermediate Requirements**.
 
 ---
@@ -17,9 +20,11 @@ Diese Abgabe entspricht vollständig den **Intermediate Requirements**.
 Die Anwendung folgt einer klar modularen Architektur:
 
 - **HttpRestServer**  
+
   Lauscht auf Port 8080 und nimmt eingehende HTTP-Requests an.
 
-- **Handlers** (`UserHandler`, `MediaHandler`, `SessionHandler`, `VersionHandler`)  
+- **Handlers** (`UserHandler`, `MediaHandler`, `VersionHandler`)
+
   Jeder Handler verarbeitet Requests basierend auf dem HTTP-Pfad.
 
 - **Models**  
@@ -35,6 +40,7 @@ Die Anwendung folgt einer klar modularen Architektur:
 
 - **Services**  
   - `UserService` (Registrierung und Login-Logik)
+  - `MediaService` (vorgesehen für Final)
 
 Der Server verwendet **HttpListener**, JSON-Parsing über `System.Text.Json`, ein eigenes Routing und ein eigenes Token-basiertes Session-System.
 
@@ -52,54 +58,33 @@ Beispiel: Authorization: Bearer abcdef....
 
 Sessions laufen nach **30 Minuten** automatisch ab (Cleanup-Mechanismus).
 
+401-Responses enthalten korrekte JSON-Fehlermeldungen.
+
 ---
 
 # 4. Implementierte Endpoints (Intermediate => REST-API Endpoints)
 
-### ✔ /users/register (POST)  
-Erstellt einen neuen User.
+| Kategorie               | Endpoint              | Methode | Status                           |
+| ----------------------- | --------------------- | ------- | -------------------------------- |
+| **Authentication**      | `/users/register`     | POST    | ✔ vollständig                    |
+|                         | `/users/login`        | POST    | ✔ vollständig                    |
+| **User-Profil (basic)** | `/users/{id}/profile` | GET     | ✔ vollständig                    |
+|                         | `/users/{id}/profile` | PUT     | ✔ vollständig                    |
+| **Media CRUD (basic)**  | `/media`              | POST    | ✔ vollständig                    |
+|                         | `/media`              | GET     | ✔ mit Titel-Filter               |
+|                         | `/media/{id}`         | GET     | ✔ vollständig                    |
+|                         | `/media/{id}`         | PUT     | ✔ (Creator-Check noch für Final) |
+|                         | `/media/{id}`         | DELETE  | ✔ (Creator-Check noch für Final) |
 
-### ✔ /users/login (POST)  
-Gibt ein Token zurück.
-
-### ✔ /users/{id}/profile (GET/PUT)  
-Eigene Profildaten abrufen/bearbeiten.
-
-### ✔ /media (POST)  
-Neues Media-Objekt erstellen.
-
-### ✔ /media (GET)  
-Media-Einträge anzeigen und nach Titel filtern.
-
-### ✔ /media/{id} (GET)  
-Daten eines Media-Eintrags abrufen.
-
-### ✔ /media/{id} (PUT)  
-Media-Eintrag aktualisieren (nur Creator).
-
-### ✔ /media/{id} (DELETE)  
-Media-Eintrag löschen (nur Creator).
 
 ---
 
-# 5. Weggelassene Features (für Final Submission)
-
-Diese Features sind **noch nicht implementiert**, da sie erst in der finalen Abgabe verlangt werden:
-
-- Ratings vollständig (edit, delete, like, confirm)
-- Favorites vollständig
-- Leaderboard
-- Recommendation-System
-- Filter & Sort (advanced)
-- Persistenz in PostgreSQL
-- 20+ Unit Tests
-
----
-
-# 6. Designentscheidungen
+# 5. Designentscheidungen
 
 ### Routing  
-Statt eines externen Frameworks wurde ein eigenes Routing-System über Reflection implementiert.  
+Alle Handler werden dynamisch über Reflection geladen (Handler.LoadHandlers())
+und das Routing basiert auf String-Vergleichen des HTTP-Pfads.
+
 Alle Handler werden automatisch erkannt (`Handler.HandleEvent`).
 
 ### Authentifizierung  
@@ -114,17 +99,17 @@ Sessions werden bewusst in Memory gespeichert, weil Intermediate keine DB erford
 
 ---
 
-# 7. Starten des Servers
+# 6. Starten des Servers
 
 dotnet run
 
 Server startet auf: http://localhost:8080/
 
-
 ---
 
-# 8. Integration Tests
+# 7. Integration Tests
 
+Tests verwenden Postman Collection Runner, Token wird automatisch in der Laufzeit gesetzt.
 Die Postman Collection im Projekt zeigt alle relevanten Intermediate-Endpunkte:
 
 - Registrierung
@@ -137,13 +122,7 @@ Die Collection kann direkt importiert und ausgeführt werden.
 
 ---
 
-# 9. GitHub Repository
-
-https://github.com/erionpolisi/MRP.git
-
----
-
-# 10. Fazit
+# 8. Fazit
 
 Alle Intermediate-Anforderungen sind erfüllt:  
 ✔ funktionierender HTTP-Server  
