@@ -186,7 +186,9 @@ namespace MRP.Server.Ext
         //general responses//
         public static void RespondNoContent(this HttpRestEventArgs e)
         {
-            e.Respond(HttpStatusCode.NoContent, new JsonObject());
+            var resp = e.Context.Response;
+            resp.StatusCode = (int)HttpStatusCode.NoContent;
+            resp.OutputStream.Close();
             e.ConsoleResponse(true, "Handled, no content.");
         }
 
