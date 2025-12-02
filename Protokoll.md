@@ -91,7 +91,7 @@ Alle Handler werden automatisch erkannt (`Handler.HandleEvent`).
 Sessions werden bewusst in Memory gespeichert, weil Intermediate keine DB erfordert.
 
 ### SOLID  
-- **S** UserHandler, MediaHandler, SessionHandler — klare Verantwortlichkeiten  
+- **S** UserHandler, MediaHandler — klare Verantwortlichkeiten  
 - **O** Neue Handler können ohne Änderungen am Server hinzugefügt werden  
 - **L** Models lassen sich austauschen, MediaEntry erfüllt Interface-Freiheit  
 - **I** Keine übergroßen Interfaces  
