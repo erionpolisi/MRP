@@ -37,6 +37,62 @@ public sealed class UserHandler : Handler, IHandler
     }
 
     // ----------------------------------------------------------
+    //     /users/{username}/profile|ratings|favorites
+    // ----------------------------------------------------------
+    private void HandleUserSubRoutes(HttpRestEventArgs e)
+    {
+        var parts = e.Path.Trim('/').Split('/');
+
+        if (parts.Length < MinimumPathPartsWithId)
+        {
+            e.RespondInvalidEndpoint();
+            return;
+        }
+
+        string userId = parts[1];
+        string action = parts[2];
+
+        switch (action)
+        {
+            case "profile":
+                HandleProtectedUserAction(
+                    e,
+                    userId,
+                    "You are not allowed to access another user's profile.",
+                    HandleUserProfile);
+                break;
+
+            case "ratings":
+                HandleProtectedUserAction(
+                    e,
+                    userId,
+                    "You are not allowed to access another user's ratings.",
+                    HandleUserRatings);
+                break;
+
+            case "favorites":
+                HandleProtectedUserAction(
+                    e,
+                    userId,
+                    "You are not allowed to access another user's favorites.",
+                    HandleUserFavorites);
+                break;
+
+            case "recommendations":
+                HandleProtectedUserAction(
+                    e,
+                    userId,
+                    "You are not allowed to access another user's recommendations.",
+                    HandleUserRecommendations);
+                break;
+
+            default:
+                e.RespondInvalidEndpoint();
+                break;
+        }
+    }
+
+    // ----------------------------------------------------------
     //               /users/register
     // ----------------------------------------------------------
     private void HandleRegister(HttpRestEventArgs e)
@@ -100,62 +156,6 @@ public sealed class UserHandler : Handler, IHandler
         catch (Exception ex)
         {
             e.RespondInternalServerError(ex);
-        }
-    }
-
-    // ----------------------------------------------------------
-    //     /users/{username}/profile|ratings|favorites
-    // ----------------------------------------------------------
-    private void HandleUserSubRoutes(HttpRestEventArgs e)
-    {
-        var parts = e.Path.Trim('/').Split('/');
-
-        if (parts.Length < MinimumPathPartsWithId)
-        {
-            e.RespondInvalidEndpoint();
-            return;
-        }
-
-        string userId = parts[1];
-        string action = parts[2];
-
-        switch (action)
-        {
-            case "profile":
-                HandleProtectedUserAction(
-                    e,
-                    userId,
-                    "You are not allowed to access another user's profile.",
-                    HandleUserProfile);
-                break;
-
-            case "ratings":
-                HandleProtectedUserAction(
-                    e,
-                    userId,
-                    "You are not allowed to access another user's ratings.",
-                    HandleUserRatings);
-                break;
-
-            case "favorites":
-                HandleProtectedUserAction(
-                    e,
-                    userId,
-                    "You are not allowed to access another user's favorites.",
-                    HandleUserFavorites);
-                break;
-
-            case "recommendations":
-                HandleProtectedUserAction(
-                    e,
-                    userId,
-                    "You are not allowed to access another user's recommendations.",
-                    HandleUserRecommendations);
-                break;
-
-            default:
-                e.RespondInvalidEndpoint();
-                break;
         }
     }
 

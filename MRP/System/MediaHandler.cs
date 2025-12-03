@@ -38,6 +38,78 @@ public sealed class MediaHandler : Handler, IHandler
         e.Responded = true;
     }
 
+    private void HandleMediaById(HttpRestEventArgs e)
+    {
+        var parts = e.Path.Trim('/').Split('/');
+
+        switch (parts.Length)
+        {
+            case 1:
+                e.RespondInvalidEndpoint();
+                break;
+            case 2:
+                HandleBasicRoute(e, parts); // GET / PUT / DELETE — /media/{id}
+                break;
+            case 3:
+                HandleSubRoutes(e, parts); // /media/{id}/rate or /media/{id}/favorite
+                break;
+            default:
+                e.RespondInvalidEndpoint();
+                break;
+        }
+    }
+    private void HandleBasicRoute(HttpRestEventArgs e, string[] parts)
+    {
+        var idPart = parts[1];
+
+        var media = GetMedia(e, idPart, out var id);
+
+        if (media is null)
+            return;
+
+        switch (e.Method.Method)
+        {
+            case "GET":
+                HandleGet(e, media);
+                break;
+            case "PUT":
+                HandleUpdate(e, media);
+                break;
+            case "DELETE":
+                HandleDelete(e, id);
+                break;
+            default:
+                e.RespondInvalidEndpoint();
+                break;
+        }
+    }
+
+    private void HandleSubRoutes(HttpRestEventArgs e, string[] parts)
+    {
+        var idPart = parts[1];
+        var action = parts[2];
+
+        var media = GetMedia(e, idPart, out var id);
+        if (media is null)
+            return;
+
+        switch (action)
+        {
+            case "rate" when e.Method == HttpMethod.Post:
+                HandleRateMedia(e, media);
+                break;
+            case "ratings" when e.Method == HttpMethod.Get:
+                HandleRatingsMedia(e, media);
+                break;
+            case "favorite" when e.Method == HttpMethod.Post || e.Method == HttpMethod.Delete:
+                HandleFavoriseMedia(e, media);
+                break;
+            default:
+                e.RespondInvalidEndpoint();
+                break;
+        }
+    }
+
     // ----------------------------------------------------------
     //                  POST /media
     // ----------------------------------------------------------
@@ -105,53 +177,6 @@ public sealed class MediaHandler : Handler, IHandler
         });
     }
 
-    private void HandleMediaById(HttpRestEventArgs e)
-    {
-        var parts = e.Path.Trim('/').Split('/');
-
-        switch (parts.Length)
-        {
-            case 1:
-                e.RespondInvalidEndpoint();
-                break;
-            case 2:
-                HandleBasicRoute(e, parts); // GET / PUT / DELETE — /media/{id}
-                break;
-            case 3:
-                HandleSubRoutes(e, parts); // /media/{id}/rate or /media/{id}/favorite
-                break;
-            default:
-                e.RespondInvalidEndpoint();
-                break;
-        }
-    }
-
-    private void HandleSubRoutes(HttpRestEventArgs e, string[] parts)
-    {
-        var idPart = parts[1];
-        var action = parts[2];
-
-        var media = GetMedia(e, idPart, out var id);
-        if (media is null)
-            return;
-
-        switch (action)
-        {
-            case "rate" when e.Method == HttpMethod.Post:
-                HandleRateMedia(e, media);
-                break;
-            case "ratings" when e.Method == HttpMethod.Get:
-                HandleRatingsMedia(e, media);
-                break;
-            case "favorite" when e.Method == HttpMethod.Post || e.Method == HttpMethod.Delete:
-                HandleFavoriseMedia(e, media);
-                break;
-            default:
-                e.RespondInvalidEndpoint();
-                break;
-        }
-    }
-
     private void HandleRatingsMedia(HttpRestEventArgs e, MediaEntry media)
     {
             e.RespondOk(new JsonObject()
@@ -197,7 +222,6 @@ public sealed class MediaHandler : Handler, IHandler
             var rating = new Rating(user, media, stars, comment);
             media.Ratings.Add(rating);
 
-            media.Ratings.Add(rating);
             e.RespondOk(new JsonObject()
             {
                 ["success"] = true,
@@ -206,32 +230,6 @@ public sealed class MediaHandler : Handler, IHandler
                 ["comment"] = rating.Comment,
                 ["message"] = "Media rated."
             });
-    }
-
-    private void HandleBasicRoute(HttpRestEventArgs e, string[] parts)
-    {
-        var idPart = parts[1];
-
-        var media = GetMedia(e, idPart, out var id);
-
-        if (media is null)
-            return;
-
-        switch (e.Method.Method)
-        {
-            case "GET":
-                HandleGet(e, media);
-                break;
-            case "PUT":
-                HandleUpdate(e, media);
-                break;
-            case "DELETE":
-                HandleDelete(e, id);
-                break;
-            default:
-                e.RespondInvalidEndpoint();
-                break;
-        }
     }
 
     private static MediaEntry? GetMedia(HttpRestEventArgs e, string idPart, out Guid id)

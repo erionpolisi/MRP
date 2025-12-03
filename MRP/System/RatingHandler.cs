@@ -78,6 +78,28 @@ public sealed class RatingHandler : Handler, IHandler
         }
     }
 
+    // ----------------------------------------------------------
+    //         /ratings/{id}/like  POST
+    //         /ratings/{id}/confirm POST
+    // ----------------------------------------------------------
+    private void HandleSubRoutes(HttpRestEventArgs e, Guid ratingId, string action)
+    {
+        switch (action)
+        {
+            case "like" when e.Method == HttpMethod.Post:
+                HandleLikeRating(e, ratingId);
+                break;
+
+            case "confirm" when e.Method == HttpMethod.Post:
+                HandleConfirmRating(e, ratingId);
+                break;
+
+            default:
+                e.RespondInvalidEndpoint();
+                break;
+        }
+    }
+
     private void HandleGetRating(HttpRestEventArgs e, Guid ratingId)
     {
         e.RespondOk(new JsonObject
@@ -106,28 +128,6 @@ public sealed class RatingHandler : Handler, IHandler
             ["ratingId"] = ratingId.ToString(),
             ["message"] = "Rating deleted (placeholder)."
         });
-    }
-
-    // ----------------------------------------------------------
-    //         /ratings/{id}/like  POST
-    //         /ratings/{id}/confirm POST
-    // ----------------------------------------------------------
-    private void HandleSubRoutes(HttpRestEventArgs e, Guid ratingId, string action)
-    {
-        switch (action)
-        {
-            case "like" when e.Method == HttpMethod.Post:
-                HandleLikeRating(e, ratingId);
-                break;
-
-            case "confirm" when e.Method == HttpMethod.Post:
-                HandleConfirmRating(e, ratingId);
-                break;
-
-            default:
-                e.RespondInvalidEndpoint();
-                break;
-        }
     }
 
     private void HandleLikeRating(HttpRestEventArgs e, Guid ratingId)
