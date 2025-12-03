@@ -8,6 +8,8 @@ namespace MRP.System;
 
 public sealed class UserHandler : Handler, IHandler
 {
+    private const int MinimumPathPartsWithId = 3;
+
     public override void Handle(HttpRestEventArgs e)
     {
         if (!e.Path.StartsWith("/users"))
@@ -108,7 +110,7 @@ public sealed class UserHandler : Handler, IHandler
     {
         var parts = e.Path.Trim('/').Split('/');
 
-        if (parts.Length < 3)
+        if (parts.Length < MinimumPathPartsWithId)
         {
             e.RespondInvalidEndpoint();
             return;
