@@ -2,7 +2,6 @@
 
 public sealed class Session
 {
-    private const string _ALPHABET = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private const int TIMEOUT_MINUTES = 30;
 
     private static readonly Dictionary<string, Session> _Sessions = new();
@@ -14,9 +13,7 @@ public sealed class Session
         IsAdmin = (UserName == "admin");
         Timestamp = DateTime.UtcNow;
 
-        Token = string.Empty;
-        Random rnd = new();
-        for(int i = 0; i < 24; i++) { Token += _ALPHABET[rnd.Next(0, 62)]; }
+        Token = Guid.NewGuid().ToString();
     }
 
     public string Token { get; }
