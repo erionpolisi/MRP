@@ -195,11 +195,15 @@ public sealed class MediaHandler : Handler, IHandler
             string? comment = e.Content["comment"]?.GetValue<string>() ?? "";
 
             var rating = new Rating(user, media, stars, comment);
+            media.Ratings.Add(rating);
 
             media.Ratings.Add(rating);
             e.RespondOk(new JsonObject()
             {
                 ["success"] = true,
+                ["ratingId"] = rating.Id.ToString(),
+                ["stars"] = rating.Stars,
+                ["comment"] = rating.Comment,
                 ["message"] = "Media rated."
             });
     }

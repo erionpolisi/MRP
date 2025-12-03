@@ -4,6 +4,7 @@ public class Rating
 {
     public Rating(User user, MediaEntry mediaEntry, int stars, string? comment = null)
     {
+        Id = Guid.NewGuid();
         User = user;
         MediaEntry = mediaEntry;
         SetStars(stars);
