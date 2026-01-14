@@ -1,9 +1,8 @@
-﻿using MRP.Handlers;
-using MRP.Server;
+﻿using MRP.Server;
 using MRP.Server.Ext;
 using System.Text.Json.Nodes;
 
-namespace MRP.System;
+namespace MRP.Handlers;
 
 public sealed class LeaderboardHandler : Handler, IHandler
 {

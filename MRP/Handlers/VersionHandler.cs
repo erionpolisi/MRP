@@ -1,12 +1,10 @@
 ﻿using System.Net;
 using System.Reflection;
 using System.Text.Json.Nodes;
-
-using MRP.Handlers;
 using MRP.Server;
 using MRP.Server.Ext;
 
-namespace MRP.System;
+namespace MRP.Handlers;
 
 public sealed class VersionHandler : Handler, IHandler
 {

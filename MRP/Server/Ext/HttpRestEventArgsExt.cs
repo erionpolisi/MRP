@@ -29,7 +29,6 @@ namespace MRP.Server.Ext
             if (string.IsNullOrEmpty(rawQuery))
                 return dict;
 
-            // Remove leading ?
             string q = rawQuery.StartsWith("?") ? rawQuery[1..] : rawQuery;
 
             var pairs = q.Split('&', StringSplitOptions.RemoveEmptyEntries);
