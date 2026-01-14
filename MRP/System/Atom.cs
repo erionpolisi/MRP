@@ -1,14 +1,26 @@
-﻿namespace MRP.System;
+﻿using MRP.Repositories;
 
-public abstract class Atom: IAtom
+namespace MRP.System;
+
+public abstract class Atom : IAtom, __IVerifiable
 {
     protected Session? _EditingSession = null;
 
+    protected object? _InternalID;
+
+    public Atom(Session? session)
+    {
+        _EditingSession = session;
+    }
+
+    protected abstract IRepository _GetRepository();
+
     protected void _VerifySession(Session? session = null)
     {
-        if(session is not null) { _EditingSession = session; }
-        if(_EditingSession is null || !_EditingSession.Valid) { throw new UnauthorizedAccessException("Invalid session."); }
+        if (session is not null) { _EditingSession = session; }
+        if (_EditingSession is null || !_EditingSession.Valid) { throw new UnauthorizedAccessException("Invalid session."); }
     }
+
     protected void _EndEdit()
     {
         _EditingSession = null;
@@ -16,17 +28,45 @@ public abstract class Atom: IAtom
 
     protected void _EnsureAdmin()
     {
-        _VerifySession();
-        if(!_EditingSession!.IsAdmin) { throw new UnauthorizedAccessException("Admin privileges required."); }
+        if (!(_EditingSession?.IsAdmin ?? false))
+        {
+            throw new UnauthorizedAccessException("Admin privileges required.");
+        }
     }
-
-    protected void _EnsureAdminOrOwner(string owner)
+    
+    protected void _EnsureAdminOrOwner(string? owner)
     {
-        _VerifySession();
-        if(!(_EditingSession!.IsAdmin || _EditingSession.UserName == owner))
+        ((__IVerifiable)this).__VerifySession();
+        if (!(_EditingSession!.IsAdmin || (_EditingSession.UserName == owner)))
         {
             throw new UnauthorizedAccessException("Admin or owner privileges required.");
         }
+    }
+    
+    object? __IVerifiable.__InternalID
+    {
+        get { return _InternalID; }
+        set { _InternalID = value; }
+    }
+
+    void __IVerifiable.__VerifySession(Session? session)
+    {
+        _VerifySession(session);
+    }
+    
+    void __IVerifiable.__EndEdit()
+    {
+        _EndEdit();
+    }
+
+    void __IVerifiable.__EnsureAdmin()
+    {
+        _EnsureAdmin();
+    }
+
+    void __IVerifiable.__EnsureAdminOrOwner(string? owner)
+    {
+        _EnsureAdminOrOwner(owner);
     }
 
     public virtual void BeginEdit(Session session)
@@ -34,9 +74,21 @@ public abstract class Atom: IAtom
         _VerifySession(session);
     }
 
-    public abstract void Save();
+    public virtual void Save()
+    {
+        _GetRepository().Save(this);
+        _EndEdit();
+    }
 
-    public abstract void Delete();
+    public virtual void Delete()
+    {
+        _GetRepository().Delete(this);
+        _EndEdit();
+    }
 
-    public abstract void Refresh();
+    public virtual void Refresh()
+    {
+        _GetRepository().Refresh(this);
+        _EndEdit();
+    }
 }
