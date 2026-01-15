@@ -31,7 +31,7 @@ public sealed class RatingRepository
         obj.Stars = re.GetInt("STARS");
         obj.Comment = re.GetString("COMMENT");
         obj.IsConfirmed = re.GetBool("IS_CONFIRMED");
-        obj.Timestamp = re.GetDateTime("CREATED_AT");
+        obj.CreatedAt = re.GetDateTime("CREATED_AT");
 
         return obj;
     }
@@ -101,7 +101,7 @@ public sealed class RatingRepository
                .BindParam(":s", obj.Stars)
                .BindParam(":c", obj.Comment)
                .BindParam(":conf", obj.IsConfirmed)
-               .BindParam(":t", obj.Timestamp);
+               .BindParam(":t", obj.CreatedAt);
         }
         else
         {

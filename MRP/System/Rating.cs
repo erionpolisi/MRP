@@ -15,7 +15,7 @@ public sealed class Rating : Atom, IAtom, __IVerifiable
         _InternalID = Guid.NewGuid();
         MediaId = media.Id;
         UserName = session.UserName;
-        Timestamp = DateTime.UtcNow;
+        CreatedAt = DateTime.UtcNow;
     }
 
     public Guid Id => (Guid?)_InternalID ?? Guid.Empty;
@@ -25,7 +25,7 @@ public sealed class Rating : Atom, IAtom, __IVerifiable
     public int Stars { get; internal set; }
     public string? Comment { get; internal set; }
     public bool IsConfirmed { get; internal set; }
-    public DateTime Timestamp { get; internal set; }
+    public DateTime CreatedAt { get; internal set; }
 
     public void SetRating(int stars, string? comment)
     {

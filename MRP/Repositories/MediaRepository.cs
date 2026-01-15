@@ -15,6 +15,7 @@ public sealed class MediaEntryRepository
         obj.ReleaseYear = re.GetInt("RELEASE_YEAR");
         obj.AgeRestriction = re.GetInt("AGE_RESTRICTION");
         obj.Creator = re.GetString("CREATOR");
+        obj.AverageScore = re.GetDouble("AVG_SCORE");
 
         var genres = re.GetString("GENRES");
         obj.Genres = string.IsNullOrWhiteSpace(genres)
@@ -42,8 +43,19 @@ public sealed class MediaEntryRepository
     {
         using IDbCommand cmd = _Cn.CreateCommand();
         cmd.CommandText = """
-            SELECT ID, TITLE, DESCRIPTION, TYPE, RELEASE_YEAR, AGE_RESTRICTION, GENRES, CREATOR
-            FROM MEDIA
+            SELECT 
+            m.ID,
+            m.TITLE,
+            m.DESCRIPTION,
+            m.TYPE,
+            m.RELEASE_YEAR,
+            m.AGE_RESTRICTION,
+            m.GENRES,
+            m.CREATOR,
+            COALESCE(AVG(r.STARS), 0) AS AVG_SCORE
+        FROM MEDIA m
+        LEFT JOIN RATINGS r ON r.MEDIA_ID = m.ID
+        GROUP BY m.ID
         """;
 
         using IDataReader re = cmd.ExecuteReader();

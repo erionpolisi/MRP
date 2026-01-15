@@ -24,10 +24,16 @@ public sealed class MediaEntry : Atom, IAtom, __IVerifiable
     public int ReleaseYear { get; set; }
     public int AgeRestriction { get; set; }
     public List<string> Genres { get; set; } = new();
+    public double AverageScore { get; internal set; }
 
     public string Creator { get; internal set; } = string.Empty;
 
     protected override IRepository _GetRepository() => _Repository;
+
+    public static IEnumerable<MediaEntry> All
+    {
+        get { return _Repository.GetAll(); }
+    }
 
     public override void Save()
     {
@@ -43,8 +49,11 @@ public sealed class MediaEntry : Atom, IAtom, __IVerifiable
 
     public enum MediaType
     {
+        Unknown = 0,
         Movie = 1,
         Series = 2,
         Game = 3
     }
+    public static MediaEntry? Get(Guid id, Session? session = null)
+        => _Repository.Get(id, session);
 }

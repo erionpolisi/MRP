@@ -117,10 +117,14 @@ public sealed class MediaHandler : Handler, IHandler
     {
         try
         {
-            var entry = new MediaEntry
+            if (e.Session == null)
             {
-                Id = Guid.NewGuid(),
-                Creator = UserRepository.Get(e.Session!.UserName)!,
+                e.RespondUnauthorized();
+                return;
+            }
+
+            var media = new MediaEntry(e.Session)
+            {
                 Title = e.Content["title"]?.GetValue<string>() ?? "",
                 Description = e.Content["description"]?.GetValue<string>() ?? "",
                 Type = Enum.TryParse<MediaEntry.MediaType>(
@@ -131,16 +135,18 @@ public sealed class MediaHandler : Handler, IHandler
 
                 ReleaseYear = e.Content["releaseYear"]?.GetValue<int>() ?? 0,
                 AgeRestriction = e.Content["ageRestriction"]?.GetValue<int>() ?? 0,
-                Genres = e.Content["genres"]?.AsArray()?.Select(g => g!.GetValue<string>()).ToList()
+                Genres = e.Content["genres"]?.AsArray()
+                             ?.Select(g => g!.GetValue<string>())
+                             .ToList()
                          ?? new List<string>()
             };
 
-            MediaRepository.Add(entry);
+            media.Save();
 
             e.RespondCreated(new JsonObject
             {
                 ["success"] = true,
-                ["id"] = entry.Id.ToString()
+                ["id"] = media.Id.ToString()
             });
         }
         catch (Exception ex)
@@ -149,33 +155,34 @@ public sealed class MediaHandler : Handler, IHandler
         }
     }
 
+
     // ----------------------------------------------------------
     //                  GET /media
     // ----------------------------------------------------------
     private void HandleList(HttpRestEventArgs e)
     {
-        // Filter by title if provided
-        var titleQuery = (e.Query.TryGetValue("title", out var t) ? t : "")
+        var titleQuery =
+            (e.Query.TryGetValue("title", out var t) ? t : "")
             ?.ToLowerInvariant() ?? "";
 
-        var list = MediaRepository.GetAll()
-            .Where(x => x.Title.ToLowerInvariant().Contains(titleQuery))
+        var list = MediaEntry.All
+            .Where(m => m.Title.ToLowerInvariant().Contains(titleQuery))
             .Select(m => new JsonObject
             {
                 ["id"] = m.Id.ToString(),
                 ["title"] = m.Title,
                 ["type"] = m.Type.ToString(),
                 ["score"] = m.AverageScore
-            });
-
-        var json = new JsonArray(list.ToArray());
+            })
+            .ToArray();
 
         e.RespondOk(new JsonObject
         {
             ["success"] = true,
-            ["media"] = json
+            ["media"] = new JsonArray(list)
         });
     }
+
 
     private void HandleRatingsMedia(HttpRestEventArgs e, MediaEntry media)
     {
@@ -186,15 +193,20 @@ public sealed class MediaHandler : Handler, IHandler
             });
     }
 
-    private void HandleFavoriseMedia(HttpRestEventArgs e, MediaEntry? media)
+    private void HandleFavoriseMedia(HttpRestEventArgs e, MediaEntry media)
     {
-        var user = UserRepository.Get(e.Session!.UserName)!;
+        if (e.Session == null)
+        {
+            e.RespondUnauthorized();
+            return;
+        }
+
         if (e.Method == HttpMethod.Post)
         {
-            media.FavoritedBy.Add(user);
-            user.FavoritedMediaIds.Add(media.Id);
+            var fav = new MediaFavorite(e.Session, media);
+            fav.Save();
 
-            e.RespondOk(new JsonObject()
+            e.RespondOk(new JsonObject
             {
                 ["success"] = true,
                 ["message"] = "Media set as favorite."
@@ -202,10 +214,11 @@ public sealed class MediaHandler : Handler, IHandler
         }
         else if (e.Method == HttpMethod.Delete)
         {
-            media.FavoritedBy.Remove(user);
-            user.FavoritedMediaIds.Remove(media.Id);
+            var fav = MediaFavorite.Get(e.Session.UserName, media.Id);
+            if (fav != null)
+                fav.Delete();
 
-            e.RespondOk(new JsonObject()
+            e.RespondOk(new JsonObject
             {
                 ["success"] = true,
                 ["message"] = "Media unfavorited."
@@ -213,24 +226,38 @@ public sealed class MediaHandler : Handler, IHandler
         }
     }
 
-    private void HandleRateMedia(HttpRestEventArgs e, MediaEntry? media)
+
+    private void HandleRateMedia(HttpRestEventArgs e, MediaEntry media)
     {
-            var user = UserRepository.Get(e.Session!.UserName)!;
+        try
+        {
             int stars = e.Content["stars"]?.GetValue<int>() ?? 0;
-            string? comment = e.Content["comment"]?.GetValue<string>() ?? "";
+            string? comment = e.Content["comment"]?.GetValue<string>();
 
-            var rating = new Rating(user, media, stars, comment);
-            media.Ratings.Add(rating);
+            if (stars < 1 || stars > 5)
+            {
+                e.RespondBadRequest("Stars must be between 1 and 5.");
+                return;
+            }
 
-            e.RespondOk(new JsonObject()
+            var rating = new Rating(e.Session!, media);
+            rating.SetRating(stars, comment);
+            rating.Save();
+
+            e.RespondCreated(new JsonObject
             {
                 ["success"] = true,
-                ["ratingId"] = rating.Id.ToString(),
+                ["mediaId"] = media.Id,
                 ["stars"] = rating.Stars,
-                ["comment"] = rating.Comment,
-                ["message"] = "Media rated."
+                ["comment"] = rating.Comment
             });
+        }
+        catch (Exception ex)
+        {
+            e.RespondInternalServerError(ex);
+        }
     }
+
 
     private static MediaEntry? GetMedia(HttpRestEventArgs e, string idPart, out Guid id)
     {
@@ -240,7 +267,7 @@ public sealed class MediaHandler : Handler, IHandler
             return null;
         }
 
-        var media = MediaRepository.Get(id);
+        var media = MediaEntry.Get(id, e.Session);
         if (media is null)
         {
             e.RespondNotFound("Media not found.");
@@ -296,7 +323,27 @@ public sealed class MediaHandler : Handler, IHandler
 
     private void HandleDelete(HttpRestEventArgs e, Guid id)
     {
-        MediaRepository.Delete(id);
-        e.RespondNoContent();
+        try
+        {
+            var media = MediaEntry.Get(id, e.Session);
+            if (media is null)
+            {
+                e.RespondNotFound("Media not found.");
+                return;
+            }
+
+            media.BeginEdit(e.Session!);
+            media.Delete();
+
+            e.RespondNoContent();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            e.RespondForbidden("You are not allowed to delete this media.");
+        }
+        catch (Exception ex)
+        {
+            e.RespondInternalServerError(ex);
+        }
     }
 }

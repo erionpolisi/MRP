@@ -26,6 +26,12 @@ namespace MRP.Repositories.Ext
             return re.GetInt32(re.GetOrdinal(fieldName));
         }
 
+        public static double GetDouble(this IDataReader re, string fieldName)
+        {
+            int idx = re.GetOrdinal(fieldName);
+            return re.IsDBNull(idx) ? 0.0 : re.GetDouble(idx);
+        }
+
         public static bool GetBool(this IDataReader re, string fieldName)
         {
             return re.GetBoolean(re.GetOrdinal(fieldName));
