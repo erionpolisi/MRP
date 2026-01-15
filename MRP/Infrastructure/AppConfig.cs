@@ -9,8 +9,8 @@ namespace MRP.Infrastructure
         static AppConfig()
         {
             Configuration = new ConfigurationBuilder()
-                .AddUserSecrets<AppMarker>()   // ← bindet User Secrets
-                .AddEnvironmentVariables()   // optional, aber gut
+                .AddUserSecrets<AppMarker>()
+                .AddEnvironmentVariables()
                 .Build();
         }
     }

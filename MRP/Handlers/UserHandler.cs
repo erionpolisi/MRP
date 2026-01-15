@@ -3,6 +3,7 @@ using MRP.Server.Ext;
 using MRP.System;
 using System.Net;
 using System.Text.Json.Nodes;
+using MRP.Repositories;
 
 namespace MRP.Handlers;
 
@@ -104,19 +105,22 @@ public sealed class UserHandler : Handler, IHandler
             string email = e.Content?["email"]?.GetValue<string>() ?? "";
             string password = e.Content?["password"]?.GetValue<string>() ?? "";
 
-            var (ok, message, user, session) = UserService.Register(username, fullname, email, password);
-
-            if (!ok)
+            var user = new User
             {
-                e.RespondConflict(message);
-                return;
-            }
+                EMail = email,
+                FullName = fullname,
+                UserName = username,
+            };
+            user.SetPassword(password);
+
+            UserRepository repo;
+            repo.Save(user);
 
             e.RespondCreated(new JsonObject
             {
                 ["success"] = true,
                 ["message"] = message,
-                ["token"] = session?.Token ?? "",
+                ["token"] = e.Session?.Token ?? "",
                 ["userId"] = user.Id
             });
         }

@@ -89,11 +89,11 @@ namespace MRP.Repositories
         {
             if (((__IVerifiable)obj).__InternalID is null)
             {
-                if (string.IsNullOrWhiteSpace(((_IAuthentificable)obj).__Username))
+                if (string.IsNullOrWhiteSpace(((__IAuthentificable)obj).__Username))
                 {
                     throw new InvalidOperationException("User name must not be empty.");
                 }
-                if (string.IsNullOrWhiteSpace(((_IAuthentificable)obj).__PasswordHash))
+                if (string.IsNullOrWhiteSpace(((__IAuthentificable)obj).__PasswordHash))
                 {
                     throw new InvalidOperationException("Password must not be empty.");
                 }
@@ -101,22 +101,22 @@ namespace MRP.Repositories
                 using IDbCommand cmd = _Cn.CreateCommand();
                 cmd.CommandText = "INSERT INTO USERS (USERNAME, NAME, PASSWD, EMAIL, HADMIN) " +
                                   "VALUES (:u, :n, :p, :e, :a)";
-                cmd.BindParam(":u", ((_IAuthentificable)obj).__Username)
+                cmd.BindParam(":u", ((__IAuthentificable)obj).__Username)
                    .BindParam(":n", obj.FullName)
-                   .BindParam(":p", ((_IAuthentificable)obj).__PasswordHash)
+                   .BindParam(":p", ((__IAuthentificable)obj).__PasswordHash)
                    .BindParam(":e", obj.EMail)
                    .BindParam(":a", obj.IsAdmin);
                 cmd.ExecuteNonQuery();
             }
             else
             {
-                string pwd = string.IsNullOrWhiteSpace(((_IAuthentificable)obj).__PasswordHash) ?
+                string pwd = string.IsNullOrWhiteSpace(((__IAuthentificable)obj).__PasswordHash) ?
                              string.Empty : "PASSWD = :p, ";
                 using IDbCommand cmd = _Cn.CreateCommand();
                 cmd.CommandText = $"UPDATE USERS SET NAME ? :n, {pwd}EMAIL = :e, HADMIN = :a " +
                                   "WHERE USERNAME = :u";
                 cmd.BindParam(":n", obj.FullName);
-                if (!string.IsNullOrWhiteSpace(pwd)) { cmd.BindParam(":p", ((_IAuthentificable)obj).__PasswordHash); }
+                if (!string.IsNullOrWhiteSpace(pwd)) { cmd.BindParam(":p", ((__IAuthentificable)obj).__PasswordHash); }
                 cmd.BindParam(":e", obj.EMail).BindParam(":a", obj.IsAdmin).BindParam(":u", obj.UserName);
                 cmd.ExecuteNonQuery();
             }
