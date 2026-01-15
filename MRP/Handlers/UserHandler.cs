@@ -100,28 +100,40 @@ public sealed class UserHandler : Handler, IHandler
     {
         try
         {
-            string username = e.Content?["username"]?.GetValue<string>() ?? "";
-            string fullname = e.Content?["fullname"]?.GetValue<string>() ?? "";
-            string email = e.Content?["email"]?.GetValue<string>() ?? "";
-            string password = e.Content?["password"]?.GetValue<string>() ?? "";
+            string username = e.Content["username"]?.GetValue<string>() ?? "";
+            string fullname = e.Content["fullname"]?.GetValue<string>() ?? "";
+            string email = e.Content["email"]?.GetValue<string>() ?? "";
+            string password = e.Content["password"]?.GetValue<string>() ?? "";
 
-            var user = new User
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             {
-                EMail = email,
-                FullName = fullname,
-                UserName = username,
-            };
-            user.SetPassword(password);
+                e.RespondBadRequest("Username and password are required.");
+                return;
+            }
 
-            UserRepository repo;
-            repo.Save(user);
+            if (User.Get(username) != null)
+            {
+                e.RespondConflict("Username already exists.");
+                return;
+            }
+
+            var user = new User()
+            {
+                UserName = username,
+                FullName = fullname,
+                EMail = email
+            };
+
+            user.SetPassword(password);
+            user.Save();
+
+            var session = Session.Create(user);
 
             e.RespondCreated(new JsonObject
             {
                 ["success"] = true,
-                ["message"] = message,
-                ["token"] = e.Session?.Token ?? "",
-                ["userId"] = user.Id
+                ["token"] = session.Token,
+                ["userName"] = user.UserName
             });
         }
         catch (Exception ex)
@@ -129,6 +141,7 @@ public sealed class UserHandler : Handler, IHandler
             e.RespondInternalServerError(ex);
         }
     }
+
 
     // ----------------------------------------------------------
     //               /users/login
@@ -137,24 +150,37 @@ public sealed class UserHandler : Handler, IHandler
     {
         try
         {
-            string username = e.Content?["username"]?.GetValue<string>() ?? "";
-            string password = e.Content?["password"]?.GetValue<string>() ?? "";
+            string username = e.Content["username"]?.GetValue<string>() ?? "";
+            string password = e.Content["password"]?.GetValue<string>() ?? "";
 
-            var (ok, message, user, session) = UserService.Login(username, password);
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            {
+                e.RespondBadRequest("Username and password are required.");
+                return;
+            }
 
-            if (!ok)
+            var user = User.Get(username);
+            if (user == null)
             {
                 e.RespondUnauthorized();
                 return;
             }
 
+            var hash = User._HashPassword(username, password);
+            if (hash != ((__IAuthentificable)user).__PasswordHash)
+            {
+                e.RespondUnauthorized();
+                return;
+            }
+
+            var session = Session.Create(user);
+
             e.RespondOk(new JsonObject
             {
                 ["success"] = true,
-                ["message"] = "hello " + username,
-                ["token"] = session!.Token,
-                ["userId"] = user.Id
-
+                ["message"] = "hello " + user.UserName,
+                ["token"] = session.Token,
+                ["userName"] = user.UserName
             });
         }
         catch (Exception ex)
@@ -163,13 +189,14 @@ public sealed class UserHandler : Handler, IHandler
         }
     }
 
+
     private void HandleProtectedUserAction(
         HttpRestEventArgs e,
         string userId,
         string errorMessage,
         Action<HttpRestEventArgs, string> handler)
     {
-        if (!e.EnsureAccess(userId, errorMessage, out var guid)) return;
+        if (!e.EnsureAccess(userId, errorMessage)) return;
 
         handler(e, userId);
     }
