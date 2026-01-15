@@ -17,9 +17,13 @@ public abstract class Atom : IAtom, __IVerifiable
 
     protected void _VerifySession(Session? session = null)
     {
-        if (session is not null) { _EditingSession = session; }
-        if (_EditingSession is null || !_EditingSession.Valid) { throw new UnauthorizedAccessException("Invalid session."); }
+        if (session is not null)
+            _EditingSession = session;
+
+        if (_EditingSession is null)
+            throw new UnauthorizedAccessException("Invalid session.");
     }
+
 
     protected void _EndEdit()
     {

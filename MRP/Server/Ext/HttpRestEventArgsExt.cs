@@ -67,26 +67,18 @@ namespace MRP.Server.Ext
             return dict;
         }
 
-        public static bool EnsureAccess(this HttpRestEventArgs e, string userId, string errorMessage, out Guid guid)
+        public static bool EnsureAccess(
+            this HttpRestEventArgs e,
+            string userName,
+            string errorMessage)
         {
-            guid = Guid.Empty;
-
-            // 1. Validate GUID format
-            if (!Guid.TryParse(userId, out guid))
-            {
-                e.RespondBadRequest("Invalid userId format.");
-                return false;
-            }
-
-            // 2. Validate existing session
-            if (e.Session is null)
+            if (e.Session == null)
             {
                 e.RespondUnauthorized();
                 return false;
             }
 
-            // 3. Check access rights
-            if (!e.Session.CanAccessUser(guid))
+            if (!e.Session.CanAccessUser(userName))
             {
                 e.RespondForbidden(errorMessage);
                 return false;
@@ -94,6 +86,7 @@ namespace MRP.Server.Ext
 
             return true;
         }
+
         public static string? GetQuery(this HttpListenerRequest request, string key, string? defaultValue = null)
         {
             var map = request.ParseQuery();

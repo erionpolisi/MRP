@@ -8,15 +8,13 @@ public sealed class User : Atom, IAtom, __IVerifiable, __IAuthentificable
 {
     private static UserRepository _Repository = new();
 
-
-    public User(Session? session)
+    public User() : base(null)
     {
-        _EditingSession = session;
     }
 
-    public User() : this(null)
-    { }
-
+    public User(Session session) : base(session)
+    {
+    }
 
     public static User? Get(string userName, Session? session = null)
     {

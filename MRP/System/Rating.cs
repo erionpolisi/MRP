@@ -1,48 +1,62 @@
-﻿namespace MRP.System;
+﻿using MRP.Repositories;
 
-public class Rating
+namespace MRP.System;
+
+public sealed class Rating : Atom, IAtom, __IVerifiable
 {
-    public Rating(User user, MediaEntry mediaEntry, int stars, string? comment = null)
+    private static RatingRepository _Repository = new();
+
+    public Rating() : base(null)
     {
-        Id = Guid.NewGuid();
-        User = user;
-        MediaEntry = mediaEntry;
-        SetStars(stars);
-        SetComment(comment);
     }
 
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Rating(Session session, MediaEntry media) : base(session)
+    {
+        _InternalID = Guid.NewGuid();
+        MediaId = media.Id;
+        UserName = session.UserName;
+        Timestamp = DateTime.UtcNow;
+    }
 
-    public User User { get; }
+    public Guid Id => (Guid?)_InternalID ?? Guid.Empty;
 
-    public MediaEntry MediaEntry { get; } 
+    public Guid MediaId { get; internal set; }
+    public string UserName { get; internal set; } = string.Empty;
+    public int Stars { get; internal set; }
+    public string? Comment { get; internal set; }
+    public bool IsConfirmed { get; internal set; }
+    public DateTime Timestamp { get; internal set; }
 
-    public int Stars { get; private set; }
-
-    public string? Comment { get; private set; } = string.Empty;
-
-    public bool IsConfirmed { get; private set; }
-
-    public DateTime Timestamp { get; private set; } = DateTime.UtcNow;
-
-    public HashSet<string> LikedByUsers { get; set; } = new();
-
-    public void SetStars(int stars)
+    public void SetRating(int stars, string? comment)
     {
         if (stars < 1 || stars > 5)
             throw new ArgumentException("Stars must be between 1 and 5.");
-        Stars = stars;
-        IsConfirmed = false;
-    }
 
-    public void SetComment(string? comment)
-    {
+        Stars = stars;
         Comment = comment;
         IsConfirmed = false;
     }
 
     public void Confirm()
     {
+        _EnsureAdminOrOwner(UserName);
         IsConfirmed = true;
     }
+
+    protected override IRepository _GetRepository() => _Repository;
+
+    public override void Save()
+    {
+        _EnsureAdminOrOwner(UserName);
+        base.Save();
+    }
+
+    public override void Delete()
+    {
+        _EnsureAdminOrOwner(UserName);
+        base.Delete();
+    }
+
+    public static IEnumerable<Rating> For(MediaEntry media)
+        => _Repository.For(media);
 }

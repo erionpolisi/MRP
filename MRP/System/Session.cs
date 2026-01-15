@@ -1,99 +1,61 @@
-﻿namespace MRP.System;
+﻿using MRP.System;
 
 public sealed class Session
 {
     private const int TIMEOUT_MINUTES = 30;
-
     private static readonly Dictionary<string, Session> _Sessions = new();
 
-    private Session(User user, string password)
+    private Session(User user)
     {
-        UserId = user.Id;
         UserName = user.UserName;
-        IsAdmin = (UserName == "admin");
+        IsAdmin = user.IsAdmin;
         Timestamp = DateTime.UtcNow;
-
         Token = Guid.NewGuid().ToString();
+
+        lock (_Sessions)
+        {
+            _Sessions[Token] = this;
+        }
     }
 
     public string Token { get; }
     public string UserName { get; }
-    public Guid UserId { get; }
-
-    public DateTime Timestamp
-    {
-        get; private set;
-    }
-
-    public bool Valid
-    {
-        get
-        {
-            lock (_Sessions)
-            {
-                return _Sessions.ContainsKey(Token);
-            }
-        }
-    }
-
+    public DateTime Timestamp { get; private set; }
     public bool IsAdmin { get; }
 
-    public bool CanAccessUser(Guid otherUserId)
+    public bool CanAccessUser(string otherUserName)
     {
-        return IsAdmin || UserId == otherUserId;
+        return IsAdmin || UserName == otherUserName;
     }
 
-    public static Session? Create(User user, string password)
+    public static Session Create(User user)
     {
-
-        Session s = new(user, password);
-
-        lock (_Sessions)
-        {
-            _Sessions[s.Token] = s;   // Session in der Liste speichern
-        }
-
-        return s;
+        return new Session(user);
     }
-
 
     public static Session? Get(string token)
     {
-        Session? rval = null;
+        Cleanup();
 
-        _Cleanup();
-
-        lock(_Sessions)
+        lock (_Sessions)
         {
-            if(_Sessions.TryGetValue(token, out var session))
+            if (_Sessions.TryGetValue(token, out var s))
             {
-                rval = session;
-                rval.Timestamp = DateTime.UtcNow;
+                s.Timestamp = DateTime.UtcNow;
+                return s;
             }
         }
-
-        return rval;
+        return null;
     }
 
-    private static void _Cleanup()
+    private static void Cleanup()
     {
-        List<string> toRemove = new();
+        var expired = _Sessions
+            .Where(p => (DateTime.UtcNow - p.Value.Timestamp).TotalMinutes > TIMEOUT_MINUTES)
+            .Select(p => p.Key)
+            .ToList();
 
-        lock(_Sessions)
-        {
-            foreach(KeyValuePair<string, Session> pair in _Sessions)
-            {
-                if((DateTime.UtcNow - pair.Value.Timestamp).TotalMinutes > TIMEOUT_MINUTES) { toRemove.Add(pair.Key); }
-            }
-            foreach(string key in toRemove) { _Sessions.Remove(key); }
-        }
-    }
-
-    public void Close()
-    {
-        lock(_Sessions)
-        {
-            _Sessions.Remove(Token);
-        }
+        foreach (var key in expired)
+            _Sessions.Remove(key);
     }
 }

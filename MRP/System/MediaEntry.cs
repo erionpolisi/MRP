@@ -1,46 +1,50 @@
-﻿namespace MRP.System
+﻿using MRP.Repositories;
+
+namespace MRP.System;
+
+public sealed class MediaEntry : Atom, IAtom, __IVerifiable
 {
-    public class MediaEntry
+    private static MediaEntryRepository _Repository = new();
+
+    public MediaEntry() : base(null)
     {
-        public Guid Id { get; set; }
+    }
 
-        public User Creator { get; set; }
+    public MediaEntry(Session session) : base(session)
+    {
+        _InternalID = Guid.NewGuid();
+        Creator = session.UserName;
+    }
 
-        public string Title { get; set; } = string.Empty;
+    public Guid Id => (Guid?)_InternalID ?? Guid.Empty;
 
-        public string Description { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public MediaType Type { get; set; }
+    public int ReleaseYear { get; set; }
+    public int AgeRestriction { get; set; }
+    public List<string> Genres { get; set; } = new();
 
-        public MediaType Type { get; set; }
+    public string Creator { get; internal set; } = string.Empty;
 
-        public int ReleaseYear { get; set; }
+    protected override IRepository _GetRepository() => _Repository;
 
-        public List<string> Genres { get; set; } = new();
+    public override void Save()
+    {
+        _EnsureAdminOrOwner(Creator);
+        base.Save();
+    }
 
-        public int AgeRestriction { get; set; }
+    public override void Delete()
+    {
+        _EnsureAdminOrOwner(Creator);
+        base.Delete();
+    }
 
-        public List<Rating> Ratings { get; set; } = new();
-
-        public List<User> FavoritedBy { get; set; } = new();
-
-        public enum MediaType
-        {
-            Unknown = 0,
-            Movie,
-            Series,
-            Game
-        }
-
-        public double AverageScore
-        {
-            get
-            {
-                if (Ratings.Count == 0)
-                    return 0;
-
-                return Ratings.Average(r => r.Stars);
-            }
-        }
-
-
+    public enum MediaType
+    {
+        Movie = 1,
+        Series = 2,
+        Game = 3
     }
 }
