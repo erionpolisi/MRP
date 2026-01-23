@@ -13,7 +13,9 @@ public sealed class MediaEntry : Atom, IAtom, __IVerifiable
     public MediaEntry(Session session) : base(session)
     {
         _InternalID = Guid.NewGuid();
+        CreatorId = session.UserId;
         CreatorUserName = session.UserName;
+        CreatedAt = DateTime.UtcNow;
     }
 
     public Guid Id => (Guid?)_InternalID ?? Guid.Empty;
