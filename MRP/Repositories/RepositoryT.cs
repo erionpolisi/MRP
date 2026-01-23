@@ -29,6 +29,9 @@ namespace MRP.Repositories
 
                     _DbConnection = new NpgsqlConnection(cs);
                     _DbConnection.Open();
+
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("DB Connection Established");
                 }
 
                 return _DbConnection;

@@ -7,6 +7,7 @@ public sealed class Session
 
     private Session(User user)
     {
+        UserId = user.Id;
         UserName = user.UserName;
         IsAdmin = user.IsAdmin;
         Timestamp = DateTime.UtcNow;
@@ -19,6 +20,7 @@ public sealed class Session
     }
 
     public string Token { get; }
+    public Guid UserId { get; }
     public string UserName { get; }
     public DateTime Timestamp { get; private set; }
     public bool IsAdmin { get; }

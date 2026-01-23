@@ -12,11 +12,13 @@ public sealed class MediaFavorite : Atom, IAtom, __IVerifiable
         UserName = session.UserName;
         MediaId = media.Id;
         CreatedAt = DateTime.UtcNow;
+        Media = media;
     }
 
     public string UserName { get; internal set; } = "";
     public Guid MediaId { get; internal set; }
     public DateTime CreatedAt { get; internal set; }
+    public MediaEntry Media { get; internal set; }
 
 
     protected override IRepository _GetRepository() => _Repository;
@@ -37,5 +39,9 @@ public sealed class MediaFavorite : Atom, IAtom, __IVerifiable
     {
         return _Repository.Get((userName, mediaId));
     }
+
+    public static IEnumerable<MediaFavorite> ForUser(string userName)
+        => _Repository.ForUser(userName);
+
 
 }

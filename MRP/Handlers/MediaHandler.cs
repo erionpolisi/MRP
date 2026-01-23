@@ -165,7 +165,7 @@ public sealed class MediaHandler : Handler, IHandler
             (e.Query.TryGetValue("title", out var t) ? t : "")
             ?.ToLowerInvariant() ?? "";
 
-        var list = MediaEntry.All
+        var list = MediaEntry.All()
             .Where(m => m.Title.ToLowerInvariant().Contains(titleQuery))
             .Select(m => new JsonObject
             {
@@ -183,15 +183,35 @@ public sealed class MediaHandler : Handler, IHandler
         });
     }
 
-
     private void HandleRatingsMedia(HttpRestEventArgs e, MediaEntry media)
     {
-            e.RespondOk(new JsonObject()
+        if (e.Method != HttpMethod.Get)
+        {
+            e.RespondMethodNotAllowed();
+            return;
+        }
+
+        var ratings = Rating.ForMedia(media.Id);
+
+        var json = new JsonArray(
+            ratings.Select(r => new JsonObject
             {
-                ["success"] = true,
-                ["ratings"] = "ratings from media."
-            });
+                ["id"] = r.Id.ToString(),
+                ["username"] = r.UserName,
+                ["stars"] = r.Stars,
+                ["comment"] = r.IsConfirmed ? r.Comment : null,
+                ["createdAt"] = r.CreatedAt
+            }).ToArray<JsonNode?>()
+        );
+
+        e.RespondOk(new JsonObject
+        {
+            ["success"] = true,
+            ["mediaId"] = media.Id.ToString(),
+            ["ratings"] = json
+        });
     }
+
 
     private void HandleFavoriseMedia(HttpRestEventArgs e, MediaEntry media)
     {

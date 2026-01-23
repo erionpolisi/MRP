@@ -27,19 +27,21 @@ public sealed class User : Atom, IAtom, __IVerifiable, __IAuthentificable
         return _Repository;
     }
 
+    public Guid Id
+    {
+        get => (Guid)((__IVerifiable)this).__InternalID!;
+        internal set => ((__IVerifiable)this).__InternalID = value;
+    }
 
     public bool IsAdmin { get; set; } = false;
 
     public string UserName
     {
-        get { return ((string?)((__IVerifiable)this).__InternalID) ?? string.Empty; }
-        set
+        get => ((__IAuthentificable)this).__Username ?? string.Empty;
+        internal set
         {
-            if (_InternalID is not null)
-            {
-                throw new InvalidOperationException("User name cannot be changed.");
-            }
-            if (string.IsNullOrWhiteSpace(value)) { throw new ArgumentException("User name must not be empty."); }
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("User name must not be empty.");
 
             ((__IAuthentificable)this).__Username = value;
             ((__IAuthentificable)this).__PasswordHash = null;
@@ -72,7 +74,7 @@ public sealed class User : Atom, IAtom, __IVerifiable, __IAuthentificable
 
     public void SetPassword(string password)
     {
-        ((__IAuthentificable)this).__PasswordHash = _HashPassword(UserName, password);
+        ((__IAuthentificable)this).__PasswordHash = _HashPassword(((__IAuthentificable)this).__Username, password);
     }
 
     public override void Save()

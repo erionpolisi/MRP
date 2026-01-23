@@ -7,22 +7,22 @@ namespace MRP.Repositories;
 public sealed class RatingRepository
     : Repository<Rating>, IRepository<Rating>, IRepository
 {
-    public IEnumerable<Rating> For(MediaEntry media)
+    public IEnumerable<Rating> ForUser(string username)
     {
-        using IDbCommand cmd = _Cn.CreateCommand();
+        using var cmd = _Cn.CreateCommand();
         cmd.CommandText = """
-            SELECT ID, MEDIA_ID, USERNAME, STARS, COMMENT, IS_CONFIRMED, CREATED_AT
-            FROM RATINGS
-            WHERE MEDIA_ID = :mid
-        """;
-        cmd.BindParam(":mid", media.Id);
+                              SELECT r.*
+                              FROM ratings r
+                              JOIN users u ON u.id = r.user_id
+                              WHERE u.username = :u
+                          """;
+        cmd.BindParam(":u", username);
 
-        using IDataReader re = cmd.ExecuteReader();
+        using var re = cmd.ExecuteReader();
         while (re.Read())
-        {
             yield return _CreateObject(re);
-        }
     }
+
 
     protected override Rating _RefreshObject(IDataReader re, Rating obj)
     {
@@ -128,4 +128,21 @@ public sealed class RatingRepository
         cmd.BindParam(":id", obj.Id);
         cmd.ExecuteNonQuery();
     }
+
+    public IEnumerable<Rating> ForMedia(Guid mediaId)
+    {
+        using var cmd = _Cn.CreateCommand();
+        cmd.CommandText = """
+                              SELECT *
+                              FROM RATINGS
+                              WHERE MEDIA_ID = :m
+                              ORDER BY CREATED_AT DESC
+                          """;
+        cmd.BindParam(":m", mediaId);
+
+        using var re = cmd.ExecuteReader();
+        while (re.Read())
+            yield return _CreateObject(re);
+    }
+
 }

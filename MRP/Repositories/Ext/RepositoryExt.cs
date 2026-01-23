@@ -41,6 +41,11 @@ namespace MRP.Repositories.Ext
         {
             return re.GetDateTime(re.GetOrdinal(fieldName));
         }
+        public static string[] GetStringArray(this IDataReader re, string field)
+        {
+            return (string[])re[field];
+        }
+
     }
 
 }

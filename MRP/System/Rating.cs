@@ -57,6 +57,10 @@ public sealed class Rating : Atom, IAtom, __IVerifiable
         base.Delete();
     }
 
-    public static IEnumerable<Rating> For(MediaEntry media)
-        => _Repository.For(media);
+    public static IEnumerable<Rating> ForUser(string username)
+        => _Repository.ForUser(username);
+
+    public static IEnumerable<Rating> ForMedia(Guid id)
+        => _Repository.ForMedia(id);
+
 }

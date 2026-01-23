@@ -203,5 +203,15 @@ namespace MRP.Server.Ext
             });
             e.ConsoleResponse(false, "Invalid endpoint.");
         }
+        public static void RespondMethodNotAllowed(this HttpRestEventArgs e)
+        {
+            e.Respond(
+                HttpStatusCode.MethodNotAllowed, new JsonObject 
+                {
+                    ["success"] = false,
+                    ["reason"] = "Method not allowed."
+            });
+        }
+
     }
 }

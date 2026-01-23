@@ -15,7 +15,7 @@
             {
               "listen": "test",
               "script": {
-                "id": "a399323a-fa97-4b83-9f57-ba457ba58ad8",
+                "id": "10719bbd-dc44-4157-b114-5e1f799c212b",
                 "exec": [
                   "pm.test(\"Successful POST request\", function () {",
                   "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]);",
@@ -23,25 +23,30 @@
                   "",
                   "var jsonData = pm.response.json();",
                   "if (jsonData.token) pm.environment.set(\"authToken\", jsonData.token);",
-                  "if (jsonData.userId) pm.environment.set(\"userId\", jsonData.userId);"
+                  "if (jsonData.userName) pm.environment.set(\"userId\", jsonData.userName);"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             },
             {
               "listen": "prerequest",
               "script": {
-                "id": "89e5159c-066f-4dda-9a1b-6238b679bc1e",
+                "id": "cd202780-98ab-4472-bbd2-c596f87220ca",
                 "exec": [
                   ""
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
           "id": "544b5eac-6e48-4b39-90a2-ca41c6499bd7",
           "request": {
             "method": "POST",
+            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n\"username\": \"erion\",\n\"fullname\": \"Erion Polisi\",\n\"email\": \"er.polisi@gmail.com\",\n\"password\": \"123\"\n}"
@@ -56,7 +61,8 @@
                 "register"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Login User",
@@ -72,9 +78,11 @@
                   "",
                   "var jsonData = pm.response.json();",
                   "if (jsonData.token) pm.environment.set(\"authToken\", jsonData.token);",
-                  "if (jsonData.userId) pm.environment.set(\"userId\", jsonData.userId);"
+                  "if (jsonData.userName) pm.environment.set(\"username\", jsonData.userName);"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             },
             {
@@ -84,13 +92,16 @@
                 "exec": [
                   ""
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
           "id": "1eaeebe3-713b-4d16-b712-ddbb1cf949d3",
           "request": {
             "method": "POST",
+            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\r\n\"username\": \"erion\",\r\n\"password\": \"123\"\r\n}",
@@ -110,7 +121,8 @@
                 "login"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Profile",
@@ -118,24 +130,28 @@
             {
               "listen": "test",
               "script": {
-                "id": "256cbb11-d040-40f0-b278-7e50171c59bf",
+                "id": "edcb1b3b-2f55-4153-bf7c-dd6a6e4f07b4",
                 "exec": [
                   "pm.test(\"Successful GET request\", function () {\r",
                   "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
                   "});\r",
                   ""
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             },
             {
               "listen": "prerequest",
               "script": {
-                "id": "05e5e5f9-6091-485d-96e7-e21b352f3ab7",
+                "id": "be58059a-6a6d-4b16-92e9-60028be04cfb",
                 "exec": [
                   ""
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -149,17 +165,18 @@
               }
             ],
             "url": {
-              "raw": "{{baseURL}}/users/{{userId}}/profile",
+              "raw": "{{baseURL}}/users/{{username}}/profile",
               "host": [
                 "{{baseURL}}"
               ],
               "path": [
                 "users",
-                "{{userId}}",
+                "{{username}}",
                 "profile"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Ratings",
@@ -207,7 +224,8 @@
                 "ratings"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Favorites",
@@ -255,31 +273,36 @@
                 "favorites"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Recommendations (simple)",
           "event": [
             {
-              "listen": "prerequest",
-              "script": {
-                "id": "d15cdd79-01dd-4c55-94df-673c2c7b8fd8",
-                "exec": [
-                  ""
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
               "listen": "test",
               "script": {
-                "id": "0c7c4371-cb68-4d39-941d-4810f5a10dd2",
+                "id": "b4bf4cbc-692d-4321-8732-67549d932726",
                 "exec": [
                   "pm.test(\"Successful GET request\", function () {\r",
                   "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "14bf4058-0546-4902-ae56-807879c4093b",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -293,17 +316,18 @@
               }
             ],
             "url": {
-              "raw": "{{baseURL}}/users/{{userId}}/recommendations",
+              "raw": "{{baseURL}}/users/{{username}}/recommendations",
               "host": [
                 "{{baseURL}}"
               ],
               "path": [
                 "users",
-                "{{userId}}",
+                "{{username}}",
                 "recommendations"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Recommendations (genre)",
@@ -315,7 +339,9 @@
                 "exec": [
                   ""
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             },
             {
@@ -327,7 +353,9 @@
                   "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -341,23 +369,25 @@
               }
             ],
             "url": {
-              "raw": "{{baseURL}}/users/{{userId}}/recommendations?type=genre",
+              "raw": "{{baseURL}}/users/{{username}}/recommendations?type=genre",
               "host": [
                 "{{baseURL}}"
               ],
               "path": [
                 "users",
-                "{{userId}}",
+                "{{username}}",
                 "recommendations"
               ],
               "query": [
                 {
                   "key": "type",
-                  "value": "genre"
+                  "value": "genre",
+                  "uuid": "7f5d9f72-2372-4555-af19-1c5420d2923d"
                 }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Recommendations (content)",
@@ -369,7 +399,9 @@
                 "exec": [
                   ""
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             },
             {
@@ -381,7 +413,9 @@
                   "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
                   "});"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -395,48 +429,54 @@
               }
             ],
             "url": {
-              "raw": "{{baseURL}}/users/{{userId}}/recommendations?type=content",
+              "raw": "{{baseURL}}/users/{{username}}/recommendations?type=content",
               "host": [
                 "{{baseURL}}"
               ],
               "path": [
                 "users",
-                "{{userId}}",
+                "{{username}}",
                 "recommendations"
               ],
               "query": [
                 {
                   "key": "type",
-                  "value": "content"
+                  "value": "content",
+                  "uuid": "23a1f951-c45a-4dc1-9932-d1e6b214d726"
                 }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Edit Profile",
           "event": [
             {
-              "listen": "prerequest",
-              "script": {
-                "id": "57e0153c-a255-42b2-a3d7-84e01e730e7f",
-                "exec": [
-                  ""
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
               "listen": "test",
               "script": {
-                "id": "a963e075-1d74-466e-935f-07d8d1cf6990",
+                "id": "f800dbb4-abfe-44c9-9c6e-4bd383db257e",
                 "exec": [
                   "pm.test(\"Successful PUT request\", function () {\r",
                   "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
                   "});\r",
                   ""
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "16b4df69-9667-4dda-85ab-f0b5e2642b50",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -463,17 +503,18 @@
               }
             },
             "url": {
-              "raw": "{{baseURL}}/users/{{userId}}/profile",
+              "raw": "{{baseURL}}/users/{{username}}/profile",
               "host": [
                 "{{baseURL}}"
               ],
               "path": [
                 "users",
-                "{{userId}}",
+                "{{username}}",
                 "profile"
               ]
             }
-          }
+          },
+          "response": []
         }
       ],
       "id": "abfe26f4-a959-4e66-bc0d-384ea38a709b"
@@ -541,7 +582,8 @@
                 "media"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "List All Media Entries",
@@ -587,7 +629,8 @@
                 "media"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Search Media by Title",
@@ -639,7 +682,8 @@
                 }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Media by ID",
@@ -686,7 +730,8 @@
                 "{{mediaId}}"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Update Media",
@@ -746,7 +791,8 @@
                 "{{mediaId}}"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Delete Media",
@@ -793,7 +839,8 @@
                 "{{mediaId}}"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Favorite Media",
@@ -841,7 +888,8 @@
                 "favorite"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Unfavorite Media",
@@ -889,7 +937,8 @@
                 "favorite"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Media Ratings",
@@ -937,7 +986,8 @@
                 "ratings"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Rate Media",
@@ -1001,7 +1051,8 @@
                 "rate"
               ]
             }
-          }
+          },
+          "response": []
         }
       ],
       "id": "ee3c1547-103e-4eaf-b7bd-0c57c53ec466"
@@ -1067,7 +1118,8 @@
                 "{{ratingId}}"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Delete Rating",
@@ -1114,7 +1166,8 @@
                 "{{ratingId}}"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Like Rating",
@@ -1163,7 +1216,8 @@
                 "like"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Confirm Rating Comment",
@@ -1212,7 +1266,8 @@
                 "confirm"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
           "name": "Get Rating",
@@ -1260,7 +1315,8 @@
                 "{{ratingId}}"
               ]
             }
-          }
+          },
+          "response": []
         }
       ],
       "id": "1c8e26cf-22dd-48c7-b849-f1f50e9d915d"
@@ -1312,7 +1368,8 @@
                 "leaderboard"
               ]
             }
-          }
+          },
+          "response": []
         }
       ],
       "id": "7ea8df0c-a143-4ba7-8614-b1c94bfabf25"
@@ -1349,6 +1406,7 @@
           "id": "a2961939-e782-47ef-9c0f-dcf1807acde2",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
               "raw": "{{baseURL}}/version",
               "host": [
@@ -1358,10 +1416,23 @@
                 "version"
               ]
             }
-          }
+          },
+          "response": []
         }
       ],
       "id": "95505a04-4f91-4b08-a1c0-a8478b3c3b49"
+    },
+    {
+      "name": "New Request",
+      "id": "a5cc7f25-40be-44c7-9b3a-befbee45da8d",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": ""
+        }
+      },
+      "response": []
     }
   ],
   "auth": {

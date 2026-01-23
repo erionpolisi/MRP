@@ -13,7 +13,7 @@ public sealed class MediaEntry : Atom, IAtom, __IVerifiable
     public MediaEntry(Session session) : base(session)
     {
         _InternalID = Guid.NewGuid();
-        Creator = session.UserName;
+        CreatorUserName = session.UserName;
     }
 
     public Guid Id => (Guid?)_InternalID ?? Guid.Empty;
@@ -25,27 +25,10 @@ public sealed class MediaEntry : Atom, IAtom, __IVerifiable
     public int AgeRestriction { get; set; }
     public List<string> Genres { get; set; } = new();
     public double AverageScore { get; internal set; }
+    public DateTime CreatedAt { get; internal set; }
 
-    public string Creator { get; internal set; } = string.Empty;
-
-    protected override IRepository _GetRepository() => _Repository;
-
-    public static IEnumerable<MediaEntry> All
-    {
-        get { return _Repository.GetAll(); }
-    }
-
-    public override void Save()
-    {
-        _EnsureAdminOrOwner(Creator);
-        base.Save();
-    }
-
-    public override void Delete()
-    {
-        _EnsureAdminOrOwner(Creator);
-        base.Delete();
-    }
+    public Guid CreatorId { get; internal set; }
+    public string CreatorUserName { get; internal set; } = string.Empty;
 
     public enum MediaType
     {
@@ -54,6 +37,27 @@ public sealed class MediaEntry : Atom, IAtom, __IVerifiable
         Series = 2,
         Game = 3
     }
+
+    protected override IRepository _GetRepository() => _Repository;
+
+    public static IEnumerable<MediaEntry> All(Session? session = null)
+    {
+        return _Repository.GetAll(session);
+    }
+
+    public override void Save()
+    {
+        _EnsureAdminOrOwner(CreatorUserName);
+        base.Save();
+    }
+
+    public override void Delete()
+    {
+        _EnsureAdminOrOwner(CreatorUserName);
+        base.Delete();
+    }
+
+
     public static MediaEntry? Get(Guid id, Session? session = null)
         => _Repository.Get(id, session);
 }

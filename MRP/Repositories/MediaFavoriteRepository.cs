@@ -17,22 +17,20 @@ public sealed class MediaFavoriteRepository
 
     public override MediaFavorite? Get(object id, Session? session = null)
     {
-        var (userName, mediaId) = ((string, Guid))id;
-
         using IDbCommand cmd = _Cn.CreateCommand();
         cmd.CommandText = """
-                              SELECT USER_NAME, MEDIA_ID, CREATED_AT
-                              FROM MEDIA_FAVORITES
-                              WHERE USER_NAME = :u AND MEDIA_ID = :m
-                          """;
+            SELECT USER_NAME, MEDIA_ID, CREATED_AT
+            FROM MEDIA_FAVORITES
+            WHERE USER_NAME = :u AND MEDIA_ID = :m
+        """;
 
-        cmd.BindParam(":u", userName);
-        cmd.BindParam(":m", mediaId);
+        var key = ((string user, Guid media))id;
+        cmd.BindParam(":u", key.user);
+        cmd.BindParam(":m", key.media);
 
         using IDataReader re = cmd.ExecuteReader();
         return re.Read() ? _CreateObject(re) : null;
     }
-
 
     public override IEnumerable<MediaFavorite> GetAll(Session? session = null)
     {
@@ -92,5 +90,24 @@ public sealed class MediaFavoriteRepository
         cmd.BindParam(":m", obj.MediaId);
 
         cmd.ExecuteNonQuery();
+    }
+
+    public IEnumerable<MediaFavorite> ForUser(string userName)
+    {
+        using IDbCommand cmd = _Cn.CreateCommand();
+        cmd.CommandText = """
+                              SELECT USER_NAME, MEDIA_ID, CREATED_AT
+                              FROM MEDIA_FAVORITES
+                              WHERE USER_NAME = :u
+                              ORDER BY CREATED_AT DESC
+                          """;
+
+        cmd.BindParam(":u", userName);
+
+        using IDataReader re = cmd.ExecuteReader();
+        while (re.Read())
+        {
+            yield return _CreateObject(re);
+        }
     }
 }

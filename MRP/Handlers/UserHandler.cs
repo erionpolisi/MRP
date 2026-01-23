@@ -50,7 +50,7 @@ public sealed class UserHandler : Handler, IHandler
             return;
         }
 
-        string userId = parts[1];
+        string username = parts[1];
         string action = parts[2];
 
         switch (action)
@@ -58,7 +58,7 @@ public sealed class UserHandler : Handler, IHandler
             case "profile":
                 HandleProtectedUserAction(
                     e,
-                    userId,
+                    username,
                     "You are not allowed to access another user's profile.",
                     HandleUserProfile);
                 break;
@@ -66,7 +66,7 @@ public sealed class UserHandler : Handler, IHandler
             case "ratings":
                 HandleProtectedUserAction(
                     e,
-                    userId,
+                    username,
                     "You are not allowed to access another user's ratings.",
                     HandleUserRatings);
                 break;
@@ -74,7 +74,7 @@ public sealed class UserHandler : Handler, IHandler
             case "favorites":
                 HandleProtectedUserAction(
                     e,
-                    userId,
+                    username,
                     "You are not allowed to access another user's favorites.",
                     HandleUserFavorites);
                 break;
@@ -82,7 +82,7 @@ public sealed class UserHandler : Handler, IHandler
             case "recommendations":
                 HandleProtectedUserAction(
                     e,
-                    userId,
+                    username,
                     "You are not allowed to access another user's recommendations.",
                     HandleUserRecommendations);
                 break;
@@ -133,7 +133,7 @@ public sealed class UserHandler : Handler, IHandler
             {
                 ["success"] = true,
                 ["token"] = session.Token,
-                ["userName"] = user.UserName
+                ["userName"] = username
             });
         }
         catch (Exception ex)
@@ -192,19 +192,22 @@ public sealed class UserHandler : Handler, IHandler
 
     private void HandleProtectedUserAction(
         HttpRestEventArgs e,
-        string userId,
+        string username,
         string errorMessage,
         Action<HttpRestEventArgs, string> handler)
     {
-        if (!e.EnsureAccess(userId, errorMessage)) return;
+        if (!e.EnsureAccess(username, errorMessage)) return;
 
-        handler(e, userId);
+        handler(e, username);
     }
 
-    private void HandleUserRecommendations(HttpRestEventArgs e, string userId)
+    private void HandleUserRecommendations(HttpRestEventArgs e, string username)
     {
-        // Query-Parameter genre: /users/{username}/recommendations?type=genre
-        // Query-Parameter content: /users/{username}/recommendations?type=content
+        if (e.Method != HttpMethod.Get)
+        {
+            e.RespondMethodNotAllowed();
+            return;
+        }
 
         e.Query.TryGetValue("type", out var type);
         type = string.IsNullOrWhiteSpace(type) ? "genre" : type.ToLowerInvariant();
@@ -218,51 +221,109 @@ public sealed class UserHandler : Handler, IHandler
         e.RespondOk(new JsonObject
         {
             ["success"] = true,
+            ["username"] = username,
             ["type"] = type,
-            ["userId"] = userId,
-            ["recommendations"] = $"recommendations based on {type}"
+            ["recommendations"] = new JsonArray() 
         });
     }
 
-    private void HandleUserProfile(HttpRestEventArgs e, string userId)
+    private void HandleUserProfile(HttpRestEventArgs e, string username)
     {
+        if (e.Method != HttpMethod.Get && e.Method != HttpMethod.Put)
+        {
+            e.RespondMethodNotAllowed();
+            return;
+        }
+
+        var user = User.Get(username);
+        if (user == null)
+        {
+            e.RespondNotFound("User not found.");
+            return;
+        }
+
         if (e.Method == HttpMethod.Get)
         {
             e.RespondOk(new JsonObject
             {
                 ["success"] = true,
-                ["userId"] = userId,
-                ["profile"] = "here profile data"
+                ["username"] = user.UserName,
+                ["fullname"] = user.FullName,
+                ["email"] = user.EMail,
+                ["isAdmin"] = user.IsAdmin
             });
+            return;
         }
-        else if (e.Method == HttpMethod.Put)
+
+        if (e.Method == HttpMethod.Put)
         {
+            user.FullName = e.Content["fullname"]?.GetValue<string>() ?? user.FullName;
+            user.EMail = e.Content["email"]?.GetValue<string>() ?? user.EMail;
+
+            user.Save();
+
             e.RespondOk(new JsonObject
             {
                 ["success"] = true,
-                ["userId"] = userId,
-                ["profile"] = "profile updated"
+                ["message"] = "Profile updated."
             });
+            return;
         }
     }
 
-    private void HandleUserRatings(HttpRestEventArgs e, string userId)
+
+    private void HandleUserRatings(HttpRestEventArgs e, string username)
     {
+        if (e.Method != HttpMethod.Get)
+        {
+            e.RespondMethodNotAllowed();
+            return;
+        }
+
+        var ratings = Rating.ForUser(username);
+
+        var json = new JsonArray(
+            ratings.Select(r => new JsonObject
+            {
+                ["id"] = r.Id.ToString(),
+                ["mediaId"] = r.MediaId.ToString(),
+                ["stars"] = r.Stars,
+                ["comment"] = r.IsConfirmed ? r.Comment : null,
+                ["createdAt"] = r.CreatedAt
+            }).ToArray<JsonNode?>()
+        );
+
         e.RespondOk(new JsonObject
         {
             ["success"] = true,
-            ["userId"] = userId,
-            ["ratings"] = "ratings list"
+            ["ratings"] = json
         });
     }
 
-    private void HandleUserFavorites(HttpRestEventArgs e, string userId)
+    private void HandleUserFavorites(HttpRestEventArgs e, string username)
     {
+        if (e.Method != HttpMethod.Get)
+        {
+            e.RespondMethodNotAllowed();
+            return;
+        }
+
+        var favorites = MediaFavorite.ForUser(username);
+
+        var json = new JsonArray(
+            favorites.Select(f => new JsonObject
+            {
+                ["mediaId"] = f.MediaId.ToString(),
+                ["title"] = f.Media.Title,
+                ["type"] = f.Media.Type.ToString()
+            }).ToArray()
+        );
+
         e.RespondOk(new JsonObject
         {
             ["success"] = true,
-            ["userId"] = userId,
-            ["favorites"] = "favorites "
+            ["favorites"] = json
         });
     }
+
 }
