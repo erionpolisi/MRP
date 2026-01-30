@@ -11,11 +11,12 @@ public sealed class RatingRepository
     {
         using var cmd = _Cn.CreateCommand();
         cmd.CommandText = """
-                              SELECT r.*
-                              FROM ratings r
-                              JOIN users u ON u.id = r.user_id
-                              WHERE u.username = :u
+                              SELECT ID, MEDIA_ID, USERNAME, STARS, COMMENT, IS_CONFIRMED, CREATED_AT
+                              FROM RATINGS
+                              WHERE USERNAME = :u
+                              ORDER BY CREATED_AT DESC
                           """;
+
         cmd.BindParam(":u", username);
 
         using var re = cmd.ExecuteReader();
@@ -23,10 +24,9 @@ public sealed class RatingRepository
             yield return _CreateObject(re);
     }
 
-
     protected override Rating _RefreshObject(IDataReader re, Rating obj)
     {
-        obj.MediaId = Guid.Parse(re.GetString("MEDIA_ID"));
+        obj.MediaId = re.GetGuid("MEDIA_ID");
         obj.UserName = re.GetString("USERNAME");
         obj.Stars = re.GetInt("STARS");
         obj.Comment = re.GetString("COMMENT");
@@ -87,39 +87,27 @@ public sealed class RatingRepository
     public override void Save(Rating obj)
     {
         using IDbCommand cmd = _Cn.CreateCommand();
-
-        if (((__IVerifiable)obj).__InternalID is null)
-        {
-            cmd.CommandText = """
-                INSERT INTO RATINGS
-                (ID, MEDIA_ID, USERNAME, STARS, COMMENT, IS_CONFIRMED, CREATED_AT)
-                VALUES (:id, :mid, :u, :s, :c, :conf, :t)
-            """;
-            cmd.BindParam(":id", obj.Id)
-               .BindParam(":mid", obj.MediaId)
-               .BindParam(":u", obj.UserName)
-               .BindParam(":s", obj.Stars)
-               .BindParam(":c", obj.Comment)
-               .BindParam(":conf", obj.IsConfirmed)
-               .BindParam(":t", obj.CreatedAt);
-        }
-        else
-        {
-            cmd.CommandText = """
-                UPDATE RATINGS
-                SET STARS = :s,
-                    COMMENT = :c,
-                    IS_CONFIRMED = :conf
-                WHERE ID = :id
-            """;
-            cmd.BindParam(":id", obj.Id)
-               .BindParam(":s", obj.Stars)
-               .BindParam(":c", obj.Comment)
-               .BindParam(":conf", obj.IsConfirmed);
-        }
+        cmd.CommandText = """
+                              INSERT INTO RATINGS
+                                  (ID, MEDIA_ID, USERNAME, STARS, COMMENT, IS_CONFIRMED, CREATED_AT)
+                              VALUES
+                                  (:id, :mid, :u, :s, :c, :conf, :t)
+                              ON CONFLICT (ID) DO UPDATE SET
+                                  STARS = EXCLUDED.STARS,
+                                  COMMENT = EXCLUDED.COMMENT,
+                                  IS_CONFIRMED = EXCLUDED.IS_CONFIRMED
+                          """;
+        cmd.BindParam(":id", obj.Id)
+            .BindParam(":mid", obj.MediaId)
+            .BindParam(":u", obj.UserName)
+            .BindParam(":s", obj.Stars)
+            .BindParam(":c", obj.Comment)
+            .BindParam(":conf", obj.IsConfirmed)
+            .BindParam(":t", obj.CreatedAt);
 
         cmd.ExecuteNonQuery();
     }
+
 
     public override void Delete(Rating obj)
     {

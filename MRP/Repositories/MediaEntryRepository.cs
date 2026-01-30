@@ -15,7 +15,7 @@ public sealed class MediaEntryRepository
         obj.ReleaseYear = re.GetInt("release_year");
         obj.AgeRestriction = re.GetInt("age_restriction");
 
-        obj.CreatorId = Guid.Parse(re.GetString("creator_id"));
+        obj.CreatorId = re.GetGuid("creator_id");
         obj.CreatorUserName = re.GetString("creator_username");
 
         obj.AverageScore = re.GetDouble("avg_score");
@@ -135,28 +135,34 @@ public sealed class MediaEntryRepository
     {
         using IDbCommand cmd = _Cn.CreateCommand();
         cmd.CommandText = """
-                              SELECT DISTINCT m.id, m.title, m.description, m.type,
-                                     m.release_year, m.age_restriction,
-                                     m.genres, m.created_at,
-                                     m.creator_id,
-                                     u.username AS creator_username,
-                                     COALESCE(AVG(r2.stars), 0) AS avg_score
-                              FROM media_entries m
-                              JOIN users u ON u.id = m.creator_id
-                              LEFT JOIN ratings r2 ON r2.media_id = m.id
-                              WHERE m.id NOT IN (
-                                  SELECT media_id FROM ratings WHERE username = :u
-                              )
-                              AND EXISTS (
-                                  SELECT 1
-                                  FROM ratings r
-                                  JOIN media_entries rm ON rm.id = r.media_id
-                                  WHERE r.username = :u
-                                    AND r.stars >= 4
-                                    AND rm.genres && m.genres
-                              )
-                              GROUP BY m.id, u.username
-                              ORDER BY avg_score DESC
+                              SELECT m.id, m.title, m.description, m.type,
+                                 m.release_year, m.age_restriction,
+                                 m.genres, m.created_at,
+                                 m.creator_id,
+                                 u.username AS creator_username,
+                                 COALESCE(AVG(r2.stars), 0) AS avg_score
+                          FROM media_entries m
+                          JOIN users u ON u.id = m.creator_id
+                          LEFT JOIN ratings r2 ON r2.media_id = m.id
+                          
+                          WHERE NOT EXISTS (
+                              SELECT 1
+                              FROM ratings rx
+                              WHERE rx.media_id = m.id
+                                AND rx.username = :u
+                          )
+                          
+                          AND EXISTS (
+                              SELECT 1
+                              FROM ratings r
+                              JOIN media_entries rm ON rm.id = r.media_id
+                              WHERE r.username = :u
+                                AND r.stars >= 4
+                                AND rm.genres && m.genres
+                          )
+                          
+                          GROUP BY m.id, u.username
+                          ORDER BY avg_score DESC;
                           """;
 
         cmd.BindParam(":u", username);
@@ -170,30 +176,36 @@ public sealed class MediaEntryRepository
     {
         using IDbCommand cmd = _Cn.CreateCommand();
         cmd.CommandText = """
-                              SELECT DISTINCT m.id, m.title, m.description, m.type,
-                                     m.release_year, m.age_restriction,
-                                     m.genres, m.created_at,
-                                     m.creator_id,
-                                     u.username AS creator_username,
-                                     COALESCE(AVG(r2.stars), 0) AS avg_score
-                              FROM media_entries m
-                              JOIN users u ON u.id = m.creator_id
-                              LEFT JOIN ratings r2 ON r2.media_id = m.id
-                              WHERE m.id NOT IN (
-                                  SELECT media_id FROM ratings WHERE username = :u
-                              )
-                              AND EXISTS (
-                                  SELECT 1
-                                  FROM ratings r
-                                  JOIN media_entries rm ON rm.id = r.media_id
-                                  WHERE r.username = :u
-                                    AND r.stars >= 4
-                                    AND rm.type = m.type
-                                    AND rm.age_restriction = m.age_restriction
-                                    AND rm.genres && m.genres
-                              )
-                              GROUP BY m.id, u.username
-                              ORDER BY avg_score DESC
+                              SELECT m.id, m.title, m.description, m.type,
+                                 m.release_year, m.age_restriction,
+                                 m.genres, m.created_at,
+                                 m.creator_id,
+                                 u.username AS creator_username,
+                                 COALESCE(AVG(r2.stars), 0) AS avg_score
+                          FROM media_entries m
+                          JOIN users u ON u.id = m.creator_id
+                          LEFT JOIN ratings r2 ON r2.media_id = m.id
+                          
+                          WHERE NOT EXISTS (
+                              SELECT 1
+                              FROM ratings rx
+                              WHERE rx.media_id = m.id
+                                AND rx.username = :u
+                          )
+                          
+                          AND EXISTS (
+                              SELECT 1
+                              FROM ratings r
+                              JOIN media_entries rm ON rm.id = r.media_id
+                              WHERE r.username = :u
+                                AND r.stars >= 4
+                                AND rm.type = m.type
+                                AND rm.age_restriction = m.age_restriction
+                                AND rm.genres && m.genres
+                          )
+                          
+                          GROUP BY m.id, u.username
+                          ORDER BY avg_score DESC;
                           """;
 
         cmd.BindParam(":u", username);

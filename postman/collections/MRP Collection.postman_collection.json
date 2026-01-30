@@ -495,7 +495,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n\"favoriteGenre\": \"Action\"\n}",
+              "raw": "{\n    \"password\": \"erion123\"\n}",
               "options": {
                 "raw": {
                   "language": "text"
@@ -686,54 +686,6 @@
           "response": []
         },
         {
-          "name": "Get Media by ID",
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "id": "bc1816ce-6d2c-418a-aec9-e5d5f18f6b70",
-                "exec": [
-                  ""
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "id": "f5125b96-7ed7-4444-924f-76a02b61e4f2",
-                "exec": [
-                  "pm.test(\"Successful GET request\", function () {\r",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "id": "ecc69eb8-0a59-4c8c-8868-11ab3ae7d854",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseURL}}/media/{{mediaId}}",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "media",
-                "{{mediaId}}"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "Update Media",
           "event": [
             {
@@ -798,25 +750,31 @@
           "name": "Delete Media",
           "event": [
             {
-              "listen": "prerequest",
+              "listen": "test",
               "script": {
-                "id": "43b3fc50-bb28-4cad-945f-6be4a48c7012",
+                "id": "f9b9e6f0-036e-4f85-8ade-16018bba4f6c",
                 "exec": [
-                  ""
+                  "pm.test(\"Successful POST request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]);\r",
+                  "});\r",
+                  "\r",
+                  "if (jsonData.ratingId) pm.environment.set(\"ratingId\", jsonData.ratingId);"
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             },
             {
-              "listen": "test",
+              "listen": "prerequest",
               "script": {
-                "id": "f4a1c5a6-8e91-420a-bba5-72acfd883604",
+                "id": "e4bff698-9253-406d-920e-1378399c0fd7",
                 "exec": [
-                  "pm.test(\"Successful DELETE request\", function () {\r",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
-                  "});"
+                  ""
                 ],
-                "type": "text/javascript"
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -827,8 +785,21 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
               }
             ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{baseURL}}/media/{{mediaId}}",
               "host": [
@@ -991,49 +962,13 @@
         },
         {
           "name": "Rate Media",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "id": "00deca7e-bf8d-4d07-94ba-84a316422556",
-                "exec": [
-                  "pm.test(\"Successful POST request\", function () {\r",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]);\r",
-                  "});\r",
-                  "\r",
-                  "var json = pm.response.json();\r",
-                  "if (json.ratingId) pm.environment.set(\"ratingId\", json.ratingId);"
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "prerequest",
-              "script": {
-                "id": "c681dbb1-4de0-4089-bb1c-1fed7c8dfd19",
-                "exec": [
-                  ""
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
           "id": "42f0fa72-49b0-402f-8d72-78353e0b6ef6",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"stars\": 5,\r\n    \"comment\": \"BEST MOVIE EVER\"\r\n}",
+              "raw": "{\r\n  \"stars\": 5,\r\n  \"comment\": \"Absolut großartiger Film!\"\r\n}\r\n",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1049,6 +984,53 @@
                 "media",
                 "{{mediaId}}",
                 "rate"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Media",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "3d85332c-0b35-455c-8943-5877cd84ac23",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "0867f44c-a128-4b5e-966f-96a49f708277",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "5f7a91f1-6676-4101-a515-bb1ae7ca7520",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/media/{{mediaId}}",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "media",
+                "{{mediaId}}"
               ]
             }
           },
@@ -1313,6 +1295,59 @@
               "path": [
                 "ratings",
                 "{{ratingId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unlike Rating",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "99ac815c-dae3-4315-a3d1-f2ddbf28596c",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "e10d4242-7171-44be-963d-ece7fefe64c9",
+                "exec": [
+                  "pm.test(\"Successful DELETE request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "7d30b6db-0b6c-4e14-9ebf-e4fd51f8fb11",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/ratings/{{ratingId}}/like",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "ratings",
+                "{{ratingId}}",
+                "like"
               ]
             }
           },

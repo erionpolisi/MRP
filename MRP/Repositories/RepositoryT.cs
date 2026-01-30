@@ -42,7 +42,7 @@ namespace MRP.Repositories
         protected virtual T _CreateObject(IDataReader re)
         {
             T rval = new();
-            ((__IVerifiable)rval).__InternalID = re.GetInt("ID");
+            ((__IVerifiable)rval).__InternalID = re.GetGuid("ID");
 
             return _RefreshObject(re, rval);
         }

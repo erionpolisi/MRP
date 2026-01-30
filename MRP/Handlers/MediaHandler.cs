@@ -268,8 +268,16 @@ public sealed class MediaHandler : Handler, IHandler
         else if (e.Method == HttpMethod.Delete)
         {
             var fav = MediaFavorite.Get(e.Session.UserName, media.Id);
-            if (fav != null)
-                fav.Delete();
+
+            if (fav == null)
+            {
+                e.RespondNotFound("Media not found");
+                return;
+            }
+
+            fav.BeginEdit(e.Session);
+            fav.Delete();
+            
 
             e.RespondOk(new JsonObject
             {
@@ -301,6 +309,7 @@ public sealed class MediaHandler : Handler, IHandler
             {
                 ["success"] = true,
                 ["mediaId"] = media.Id,
+                ["ratingId"] = rating.Id,
                 ["stars"] = rating.Stars,
                 ["comment"] = rating.Comment
             });
@@ -348,31 +357,53 @@ public sealed class MediaHandler : Handler, IHandler
 
     private void HandleUpdate(HttpRestEventArgs e, MediaEntry media)
     {
-        media.Title = e.Content["title"]?.GetValue<string>() ?? media.Title;
-        media.Description = e.Content["description"]?.GetValue<string>() ?? media.Description;
-
-        if (Enum.TryParse<MediaEntry.MediaType>(
-                e.Content["mediaType"]?.GetValue<string>() ?? "",
-                true, out var mt))
+        try
         {
-            media.Type = mt;
+            media.BeginEdit(e.Session!);
+
+            media.Title = e.Content["title"]?.GetValue<string>() ?? media.Title;
+            media.Description = e.Content["description"]?.GetValue<string>() ?? media.Description;
+
+            if (Enum.TryParse<MediaEntry.MediaType>(
+                    e.Content["mediaType"]?.GetValue<string>(),
+                    true,
+                    out var mt))
+            {
+                media.Type = mt;
+            }
+
+            media.ReleaseYear =
+                e.Content["releaseYear"]?.GetValue<int>() ?? media.ReleaseYear;
+
+            if (e.Content.TryGetPropertyValue("genres", out var gnode))
+            {
+                media.Genres = gnode!
+                    .AsArray()
+                    .Select(n => n!.GetValue<string>())
+                    .ToList();
+            }
+
+            media.AgeRestriction =
+                e.Content["ageRestriction"]?.GetValue<int>() ?? media.AgeRestriction;
+
+            media.Save();
+
+            e.RespondOk(new JsonObject
+            {
+                ["success"] = true,
+                ["message"] = "Media updated."
+            });
         }
-
-        media.ReleaseYear = e.Content["releaseYear"]?.GetValue<int>() ?? media.ReleaseYear;
-
-        if (e.Content.TryGetPropertyValue("genres", out var gnode))
+        catch (UnauthorizedAccessException)
         {
-            media.Genres = gnode!.AsArray().Select(n => n!.GetValue<string>()).ToList();
+            e.RespondForbidden("You are not allowed to edit this media entry.");
         }
-
-        media.AgeRestriction = e.Content["ageRestriction"]?.GetValue<int>() ?? media.AgeRestriction;
-
-        e.RespondOk(new JsonObject
+        catch (Exception ex)
         {
-            ["success"] = true,
-            ["message"] = "Media updated."
-        });
+            e.RespondInternalServerError(ex);
+        }
     }
+
 
     private void HandleDelete(HttpRestEventArgs e, Guid id)
     {

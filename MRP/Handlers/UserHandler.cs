@@ -2,6 +2,7 @@
 using MRP.Server.Ext;
 using MRP.System;
 using System.Net;
+using System.Reflection.Metadata;
 using System.Text.Json.Nodes;
 using MRP.Repositories;
 
@@ -62,7 +63,7 @@ public sealed class UserHandler : Handler, IHandler
                     e,
                     username,
                     "You are not allowed to access another user's profile.",
-                    HandleUserProfile);
+                    HandleProfile);
                 break;
 
             case "ratings":
@@ -236,9 +237,19 @@ public sealed class UserHandler : Handler, IHandler
         });
     }
 
-    private void HandleUserProfile(HttpRestEventArgs e, string username)
+    private static readonly UserRepository _userRepo = new();
+
+    private void HandleProfile(HttpRestEventArgs e, string username)
     {
-        if (e.Method != HttpMethod.Get && e.Method != HttpMethod.Put)
+        if (e.Method == HttpMethod.Get)
+            HandleGetProfile(e, username);
+        else
+            HandleEditProfile(e, username);
+    }
+
+    private void HandleEditProfile(HttpRestEventArgs e, string username)
+    {
+        if (e.Method != HttpMethod.Put)
         {
             e.RespondMethodNotAllowed();
             return;
@@ -251,23 +262,18 @@ public sealed class UserHandler : Handler, IHandler
             return;
         }
 
-        if (e.Method == HttpMethod.Get)
+        try
         {
-            e.RespondOk(new JsonObject
-            {
-                ["success"] = true,
-                ["username"] = user.UserName,
-                ["fullname"] = user.FullName,
-                ["email"] = user.EMail,
-                ["isAdmin"] = user.IsAdmin
-            });
-            return;
-        }
+            user.BeginEdit(e.Session);
 
-        if (e.Method == HttpMethod.Put)
-        {
-            user.FullName = e.Content["fullname"]?.GetValue<string>() ?? user.FullName;
-            user.EMail = e.Content["email"]?.GetValue<string>() ?? user.EMail;
+            if (e.Content.TryGetPropertyValue("password", out var pw))
+            {
+                var pwd = pw!.GetValue<string>();
+                if (!string.IsNullOrWhiteSpace(pwd))
+                    user.SetPassword(pwd);
+            }
+            else
+                e.RespondBadRequest("User cannot be changed");
 
             user.Save();
 
@@ -276,10 +282,51 @@ public sealed class UserHandler : Handler, IHandler
                 ["success"] = true,
                 ["message"] = "Profile updated."
             });
-            return;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            e.RespondForbidden("Not allowed.");
+        }
+        catch (Exception ex)
+        {
+            e.RespondInternalServerError(ex);
         }
     }
 
+
+    private void HandleGetProfile(HttpRestEventArgs e, string username)
+    {
+        if (e.Session == null || e.Session.UserName != username)
+        {
+            e.RespondForbidden("Access denied.");
+            return;
+        }
+
+        var user = _userRepo.Get(username);
+        if (user == null)
+        {
+            e.RespondNotFound("User not found.");
+            return;
+        }
+
+        var stats = _userRepo.GetUserStatistics(username);
+
+        e.RespondOk(new JsonObject
+        {
+            ["success"] = true,
+            ["username"] = user.UserName,
+            ["fullname"] = user.FullName,
+            ["email"] = user.EMail,
+            ["isAdmin"] = user.IsAdmin,
+
+            ["statistics"] = new JsonObject
+            {
+                ["totalRatings"] = stats.TotalRatings,
+                ["averageRatingScore"] = Math.Round(stats.AverageRating, 2),
+                ["favoriteGenre"] = stats.FavoriteGenre
+            }
+        });
+    }
 
     private void HandleUserRatings(HttpRestEventArgs e, string username)
     {
@@ -320,12 +367,17 @@ public sealed class UserHandler : Handler, IHandler
         var favorites = MediaFavorite.ForUser(username);
 
         var json = new JsonArray(
-            favorites.Select(f => new JsonObject
+            favorites.Select(f =>
             {
-                ["mediaId"] = f.MediaId.ToString(),
-                ["title"] = f.Media.Title,
-                ["type"] = f.Media.Type.ToString()
-            }).ToArray()
+                var media = f.GetMedia();
+
+                return new JsonObject
+                {
+                    ["mediaId"] = media.Id.ToString(),
+                    ["title"] = media.Title,
+                    ["type"] = media.Type.ToString()
+                };
+            }).ToArray<JsonNode?>()
         );
 
         e.RespondOk(new JsonObject

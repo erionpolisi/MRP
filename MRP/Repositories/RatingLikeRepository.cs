@@ -9,7 +9,7 @@ public sealed class RatingLikeRepository
 {
     protected override RatingLike _RefreshObject(IDataReader re, RatingLike obj)
     {
-        obj.RatingId = Guid.Parse(re.GetString("rating_id"));
+        obj.RatingId = re.GetGuid("rating_id");
         obj.UserName = re.GetString("username");
         obj.CreatedAt = re.GetDateTime("created_at");
         return obj;
@@ -49,17 +49,21 @@ public sealed class RatingLikeRepository
     {
         using var cmd = _Cn.CreateCommand();
         cmd.CommandText = """
-            INSERT INTO rating_likes (rating_id, username, created_at)
-            VALUES (:r, :u, :c)
-            ON CONFLICT DO NOTHING
-        """;
+                              INSERT INTO rating_likes (rating_id, username, created_at)
+                              VALUES (:r, :u, :c)
+                              ON CONFLICT DO NOTHING
+                          """;
 
         cmd.BindParam(":r", obj.RatingId)
-           .BindParam(":u", obj.UserName)
-           .BindParam(":c", obj.CreatedAt);
+            .BindParam(":u", obj.UserName)
+            .BindParam(":c", obj.CreatedAt);
 
-        cmd.ExecuteNonQuery();
+        var affected = cmd.ExecuteNonQuery();
+
+            if (affected == 0)
+                Console.WriteLine("RatingLike ignored (already exists or constraint missing)");
     }
+
 
     public override void Delete(RatingLike obj)
     {
@@ -74,4 +78,11 @@ public sealed class RatingLikeRepository
 
         cmd.ExecuteNonQuery();
     }
+
+    protected override RatingLike _CreateObject(IDataReader re)
+    {
+        var like = new RatingLike();
+        return _RefreshObject(re, like);
+    }
+
 }

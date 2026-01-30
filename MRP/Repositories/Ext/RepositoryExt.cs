@@ -26,6 +26,29 @@ namespace MRP.Repositories.Ext
             return re.GetInt32(re.GetOrdinal(fieldName));
         }
 
+        public static Guid GetGuid(this IDataReader re, string fieldName)
+        {
+            int idx = re.GetOrdinal(fieldName);
+
+            if (re.IsDBNull(idx))
+                return Guid.Empty;
+
+            object val = re.GetValue(idx);
+
+            // PostgreSQL uuid → Guid
+            if (val is Guid g)
+                return g;
+
+            // fallback: string → Guid
+            if (val is string s)
+                return Guid.Parse(s);
+
+            throw new InvalidCastException(
+                $"Field '{fieldName}' is not a Guid (actual type: {val.GetType()})"
+            );
+        }
+
+
         public static double GetDouble(this IDataReader re, string fieldName)
         {
             int idx = re.GetOrdinal(fieldName);
@@ -40,10 +63,6 @@ namespace MRP.Repositories.Ext
         public static DateTime GetDateTime(this IDataReader re, string fieldName)
         {
             return re.GetDateTime(re.GetOrdinal(fieldName));
-        }
-        public static string[] GetStringArray(this IDataReader re, string field)
-        {
-            return (string[])re[field];
         }
 
     }

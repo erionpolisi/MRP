@@ -9,8 +9,8 @@ public sealed class MediaFavoriteRepository
 {
     protected override MediaFavorite _RefreshObject(IDataReader re, MediaFavorite obj)
     {
-        obj.UserName = re.GetString("USER_NAME");
-        obj.MediaId = Guid.Parse(re.GetString("MEDIA_ID"));
+        obj.CreatorUserName = re.GetString("USER_NAME");
+        obj.MediaId = re.GetGuid("MEDIA_ID");
         obj.CreatedAt = re.GetDateTime("CREATED_AT");
         return obj;
     }
@@ -54,7 +54,7 @@ public sealed class MediaFavoriteRepository
             WHERE USER_NAME = :u AND MEDIA_ID = :m
         """;
 
-        cmd.BindParam(":u", obj.UserName);
+        cmd.BindParam(":u", obj.CreatorUserName);
         cmd.BindParam(":m", obj.MediaId);
 
         using IDataReader re = cmd.ExecuteReader();
@@ -71,7 +71,7 @@ public sealed class MediaFavoriteRepository
             ON CONFLICT DO NOTHING
         """;
 
-        cmd.BindParam(":u", obj.UserName);
+        cmd.BindParam(":u", obj.CreatorUserName);
         cmd.BindParam(":m", obj.MediaId);
         cmd.BindParam(":c", obj.CreatedAt);
 
@@ -86,7 +86,7 @@ public sealed class MediaFavoriteRepository
             WHERE USER_NAME = :u AND MEDIA_ID = :m
         """;
 
-        cmd.BindParam(":u", obj.UserName);
+        cmd.BindParam(":u", obj.CreatorUserName);
         cmd.BindParam(":m", obj.MediaId);
 
         cmd.ExecuteNonQuery();
@@ -110,4 +110,11 @@ public sealed class MediaFavoriteRepository
             yield return _CreateObject(re);
         }
     }
+
+    protected override MediaFavorite _CreateObject(IDataReader re)
+    {
+        var fav = new MediaFavorite();
+        return _RefreshObject(re, fav);
+    }
+
 }

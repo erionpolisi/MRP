@@ -124,7 +124,7 @@ namespace MRP.Repositories
                 string pwd = string.IsNullOrWhiteSpace(((__IAuthentificable)obj).__PasswordHash) ?
                              string.Empty : "PASSWD = :p, ";
                 using IDbCommand cmd = _Cn.CreateCommand();
-                cmd.CommandText = $"UPDATE USERS SET FULLNAME ? :n, {pwd}EMAIL = :e, HADMIN = :a " +
+                cmd.CommandText = $"UPDATE USERS SET FULLNAME = :n, {pwd}EMAIL = :e, HADMIN = :a " +
                                   "WHERE USERNAME = :u";
                 cmd.BindParam(":n", obj.FullName);
                 if (!string.IsNullOrWhiteSpace(pwd)) { cmd.BindParam(":p", ((__IAuthentificable)obj).__PasswordHash); }
@@ -153,6 +153,61 @@ namespace MRP.Repositories
                 );
             }
         }
+
+        public (int TotalRatings, double AverageRating, string? FavoriteGenre)
+            GetUserStatistics(string username)
+        {
+            int totalRatings = 0;
+            double avgRating = 0;
+            string? favGenre = null;
+
+            // ---------------------------------------
+            // totalRatings + avgRating
+            // ---------------------------------------
+            using (IDbCommand cmd = _Cn.CreateCommand())
+            {
+                cmd.CommandText = """
+                                      SELECT COUNT(*) AS cnt, COALESCE(AVG(stars),0) AS avg
+                                      FROM ratings
+                                      WHERE username = :u
+                                  """;
+                cmd.BindParam(":u", username);
+
+                using IDataReader re = cmd.ExecuteReader();
+                if (re.Read())
+                {
+                    totalRatings = re.GetInt("cnt");
+                    avgRating = re.GetDouble("avg");
+                }
+            }
+
+            // ---------------------------------------
+            // favoriteGenre (simple + sufficient)
+            // ---------------------------------------
+            using (IDbCommand cmd = _Cn.CreateCommand())
+            {
+                cmd.CommandText = """
+                                      SELECT g, COUNT(*) AS cnt
+                                      FROM ratings r
+                                      JOIN media_entries m ON m.id = r.media_id,
+                                           unnest(m.genres) g
+                                      WHERE r.username = :u
+                                      GROUP BY g
+                                      ORDER BY cnt DESC
+                                      LIMIT 1
+                                  """;
+                cmd.BindParam(":u", username);
+
+                using IDataReader re = cmd.ExecuteReader();
+                if (re.Read())
+                {
+                    favGenre = re.GetString("g");
+                }
+            }
+
+            return (totalRatings, avgRating, favGenre);
+        }
+
 
     }
 
