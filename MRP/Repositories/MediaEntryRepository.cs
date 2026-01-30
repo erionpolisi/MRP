@@ -157,7 +157,7 @@ public sealed class MediaEntryRepository
                               FROM ratings r
                               JOIN media_entries rm ON rm.id = r.media_id
                               WHERE r.username = :u
-                                AND r.stars >= 4
+                                AND r.stars >= 3
                                 AND rm.genres && m.genres
                           )
                           
@@ -199,9 +199,6 @@ public sealed class MediaEntryRepository
                               JOIN media_entries rm ON rm.id = r.media_id
                               WHERE r.username = :u
                                 AND r.stars >= 4
-                                AND rm.type = m.type
-                                AND rm.age_restriction = m.age_restriction
-                                AND rm.genres && m.genres
                           )
                           
                           GROUP BY m.id, u.username
