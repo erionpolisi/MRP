@@ -9,6 +9,8 @@ namespace MRP.Handlers;
 
 public sealed class UserHandler : Handler, IHandler
 {
+    private static readonly MediaEntryRepository _mediaRepo = new();
+
     private const int MinimumPathPartsWithId = 3;
 
     public override void Handle(HttpRestEventArgs e)
@@ -212,18 +214,25 @@ public sealed class UserHandler : Handler, IHandler
         e.Query.TryGetValue("type", out var type);
         type = string.IsNullOrWhiteSpace(type) ? "genre" : type.ToLowerInvariant();
 
-        if (type != "genre" && type != "content")
+        IEnumerable<MediaEntry> recs = type switch
         {
-            e.RespondBadRequest("Invalid recommendation type. Use 'genre' or 'content'.");
-            return;
-        }
+            "content" => _mediaRepo.RecommendByContent(username),
+            _ => _mediaRepo.RecommendByGenre(username)
+        };
+
+        var json = recs.Select(m => new JsonObject
+        {
+            ["id"] = m.Id.ToString(),
+            ["title"] = m.Title,
+            ["type"] = m.Type.ToString(),
+            ["avgScore"] = m.AverageScore
+        }).ToArray();
 
         e.RespondOk(new JsonObject
         {
             ["success"] = true,
-            ["username"] = username,
-            ["type"] = type,
-            ["recommendations"] = new JsonArray() 
+            ["recommendationType"] = type,
+            ["results"] = new JsonArray(json)
         });
     }
 

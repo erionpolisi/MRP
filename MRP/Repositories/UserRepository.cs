@@ -132,6 +132,28 @@ namespace MRP.Repositories
                 cmd.ExecuteNonQuery();
             }
         }
+
+        public IEnumerable<(string UserName, int RatingCount)> GetLeaderboard()
+        {
+            using IDbCommand cmd = _Cn.CreateCommand();
+            cmd.CommandText = """
+                                  SELECT u.username, COUNT(r.id) AS rating_count
+                                  FROM users u
+                                  LEFT JOIN ratings r ON r.username = u.username
+                                  GROUP BY u.username
+                                  ORDER BY rating_count DESC
+                              """;
+
+            using IDataReader re = cmd.ExecuteReader();
+            while (re.Read())
+            {
+                yield return (
+                    re.GetString("username"),
+                    re.GetInt("rating_count")
+                );
+            }
+        }
+
     }
 
 }

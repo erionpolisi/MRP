@@ -1,11 +1,16 @@
-﻿using System.Text.Json.Nodes;
+﻿using MRP.Repositories;
 using MRP.Server;
 using MRP.Server.Ext;
+using MRP.System;
+using System.Text.Json.Nodes;
 
 namespace MRP.Handlers;
 
 public sealed class RatingHandler : Handler, IHandler
 {
+    private static readonly RatingRepository _ratingRepo = new();
+    private static readonly RatingLikeRepository _likeRepo = new();
+
     private const int MinimumPathParts = 2;
 
     public override void Handle(HttpRestEventArgs e)
@@ -27,9 +32,7 @@ public sealed class RatingHandler : Handler, IHandler
             return;
         }
 
-        string idPart = parts[1];
-
-        if (!Guid.TryParse(idPart, out var ratingId))
+        if (!Guid.TryParse(parts[1], out var ratingId))
         {
             e.RespondBadRequest("Invalid ratingId format.");
             e.Responded = true;
@@ -39,11 +42,13 @@ public sealed class RatingHandler : Handler, IHandler
         switch (parts.Length)
         {
             case 2:
-                HandleBasicRatingRoutes(e, ratingId);
+                HandleBasicRoutes(e, ratingId);
                 break;
+
             case 3:
                 HandleSubRoutes(e, ratingId, parts[2]);
                 break;
+
             default:
                 e.RespondInvalidEndpoint();
                 break;
@@ -53,44 +58,48 @@ public sealed class RatingHandler : Handler, IHandler
     }
 
     // ----------------------------------------------------------
-    //         /ratings/{id}  GET | PUT | DELETE
+    // /ratings/{id}   GET | PUT | DELETE
     // ----------------------------------------------------------
-    private void HandleBasicRatingRoutes(HttpRestEventArgs e, Guid ratingId)
+    private void HandleBasicRoutes(HttpRestEventArgs e, Guid ratingId)
     {
         switch (e.Method.Method)
         {
             case "GET":
-                HandleGetRating(e, ratingId);
+                HandleGet(e, ratingId);
                 break;
 
             case "PUT":
-                HandleUpdateRating(e, ratingId);
+                HandleUpdate(e, ratingId);
                 break;
 
             case "DELETE":
-                HandleDeleteRating(e, ratingId);
+                HandleDelete(e, ratingId);
                 break;
 
             default:
-                e.RespondInvalidEndpoint();
+                e.RespondMethodNotAllowed();
                 break;
         }
     }
 
     // ----------------------------------------------------------
-    //         /ratings/{id}/like  POST
-    //         /ratings/{id}/confirm POST
+    // /ratings/{id}/like     POST | DELETE
+    // /ratings/{id}/confirm  POST
     // ----------------------------------------------------------
     private void HandleSubRoutes(HttpRestEventArgs e, Guid ratingId, string action)
     {
         switch (action)
         {
             case "like" when e.Method == HttpMethod.Post:
-                HandleLikeRating(e, ratingId);
+                HandleLike(e, ratingId);
+                break;
+
+            case "like" when e.Method == HttpMethod.Delete:
+                HandleUnlike(e, ratingId);
                 break;
 
             case "confirm" when e.Method == HttpMethod.Post:
-                HandleConfirmRating(e, ratingId);
+                HandleConfirm(e, ratingId);
                 break;
 
             default:
@@ -99,53 +108,166 @@ public sealed class RatingHandler : Handler, IHandler
         }
     }
 
-    private void HandleGetRating(HttpRestEventArgs e, Guid ratingId)
+    // ----------------------------------------------------------
+    // GET /ratings/{id}
+    // ----------------------------------------------------------
+    private void HandleGet(HttpRestEventArgs e, Guid ratingId)
     {
+        var rating = _ratingRepo.Get(ratingId);
+        if (rating == null)
+        {
+            e.RespondNotFound("Rating not found.");
+            return;
+        }
+
         e.RespondOk(new JsonObject
         {
             ["success"] = true,
-            ["ratingId"] = ratingId.ToString(),
-            ["message"] = "Rating details (placeholder)."
+            ["id"] = rating.Id.ToString(),
+            ["mediaId"] = rating.MediaId.ToString(),
+            ["username"] = rating.UserName,
+            ["stars"] = rating.Stars,
+            ["comment"] = rating.IsConfirmed ? rating.Comment : null,
+            ["confirmed"] = rating.IsConfirmed,
+            ["createdAt"] = rating.CreatedAt
         });
     }
 
-    private void HandleUpdateRating(HttpRestEventArgs e, Guid ratingId)
+    // ----------------------------------------------------------
+    // PUT /ratings/{id}
+    // ----------------------------------------------------------
+    private void HandleUpdate(HttpRestEventArgs e, Guid ratingId)
     {
-        e.RespondOk(new JsonObject
+        var rating = _ratingRepo.Get(ratingId, e.Session);
+        if (rating == null)
+        {
+            e.RespondNotFound("Rating not found.");
+            return;
+        }
+
+        try
+        {
+            rating.BeginEdit(e.Session!);
+
+            int stars = e.Content["stars"]?.GetValue<int>() ?? rating.Stars;
+            string? comment = e.Content["comment"]?.GetValue<string>();
+
+            rating.SetRating(stars, comment);
+            rating.Save();
+
+            e.RespondOk(new JsonObject
+            {
+                ["success"] = true,
+                ["message"] = "Rating updated."
+            });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            e.RespondForbidden("You are not allowed to edit this rating.");
+        }
+        catch (Exception ex)
+        {
+            e.RespondInternalServerError(ex);
+        }
+    }
+
+    // ----------------------------------------------------------
+    // DELETE /ratings/{id}
+    // ----------------------------------------------------------
+    private void HandleDelete(HttpRestEventArgs e, Guid ratingId)
+    {
+        var rating = _ratingRepo.Get(ratingId, e.Session);
+        if (rating == null)
+        {
+            e.RespondNotFound("Rating not found.");
+            return;
+        }
+
+        try
+        {
+            rating.BeginEdit(e.Session!);
+            rating.Delete();
+            e.RespondNoContent();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            e.RespondForbidden("You are not allowed to delete this rating.");
+        }
+        catch (Exception ex)
+        {
+            e.RespondInternalServerError(ex);
+        }
+    }
+
+    // ----------------------------------------------------------
+    // POST /ratings/{id}/like
+    // ----------------------------------------------------------
+    private void HandleLike(HttpRestEventArgs e, Guid ratingId)
+    {
+        var existing = _likeRepo.Get((ratingId, e.Session!.UserName));
+        if (existing != null)
+        {
+            e.RespondConflict("You already liked this rating.");
+            return;
+        }
+
+        var like = new RatingLike(e.Session!, ratingId);
+        _likeRepo.Save(like);
+
+        e.RespondCreated(new JsonObject
         {
             ["success"] = true,
-            ["ratingId"] = ratingId.ToString(),
-            ["message"] = "Rating updated (placeholder)."
+            ["message"] = "Rating liked."
         });
     }
 
-    private void HandleDeleteRating(HttpRestEventArgs e, Guid ratingId)
+    // ----------------------------------------------------------
+    // DELETE /ratings/{id}/like
+    // ----------------------------------------------------------
+    private void HandleUnlike(HttpRestEventArgs e, Guid ratingId)
     {
-        e.RespondOk(new JsonObject
+        var like = _likeRepo.Get((ratingId, e.Session!.UserName));
+        if (like == null)
         {
-            ["success"] = true,
-            ["ratingId"] = ratingId.ToString(),
-            ["message"] = "Rating deleted (placeholder)."
-        });
+            e.RespondNotFound("Like not found.");
+            return;
+        }
+
+        _likeRepo.Delete(like);
+        e.RespondNoContent();
     }
 
-    private void HandleLikeRating(HttpRestEventArgs e, Guid ratingId)
+    // ----------------------------------------------------------
+    // POST /ratings/{id}/confirm
+    // ----------------------------------------------------------
+    private void HandleConfirm(HttpRestEventArgs e, Guid ratingId)
     {
-        e.RespondOk(new JsonObject
+        var rating = _ratingRepo.Get(ratingId, e.Session);
+        if (rating == null)
         {
-            ["success"] = true,
-            ["ratingId"] = ratingId.ToString(),
-            ["message"] = "Rating liked (placeholder)."
-        });
-    }
+            e.RespondNotFound("Rating not found.");
+            return;
+        }
 
-    private void HandleConfirmRating(HttpRestEventArgs e, Guid ratingId)
-    {
-        e.RespondOk(new JsonObject
+        try
         {
-            ["success"] = true,
-            ["ratingId"] = ratingId.ToString(),
-            ["message"] = "Rating confirmed (placeholder)."
-        });
+            rating.BeginEdit(e.Session!);
+            rating.Confirm();
+            rating.Save();
+
+            e.RespondOk(new JsonObject
+            {
+                ["success"] = true,
+                ["message"] = "Rating confirmed."
+            });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            e.RespondForbidden("You are not allowed to confirm this rating.");
+        }
+        catch (Exception ex)
+        {
+            e.RespondInternalServerError(ex);
+        }
     }
 }

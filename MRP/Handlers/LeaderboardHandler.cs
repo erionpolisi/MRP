@@ -1,11 +1,14 @@
-﻿using MRP.Server;
+﻿using System.Text.Json.Nodes;
+using MRP.Server;
 using MRP.Server.Ext;
-using System.Text.Json.Nodes;
+using MRP.Repositories;
 
 namespace MRP.Handlers;
 
 public sealed class LeaderboardHandler : Handler, IHandler
 {
+    private readonly UserRepository _repo = new();
+
     public override void Handle(HttpRestEventArgs e)
     {
         if (!e.Path.StartsWith("/leaderboard"))
@@ -16,7 +19,6 @@ public sealed class LeaderboardHandler : Handler, IHandler
 
         e.SetCurrentHandler(nameof(LeaderboardHandler));
 
-        // Only one endpoint needed: GET /leaderboard
         if (e.Path == "/leaderboard" && e.Method == HttpMethod.Get)
         {
             HandleLeaderboard(e);
@@ -29,15 +31,21 @@ public sealed class LeaderboardHandler : Handler, IHandler
         e.Responded = true;
     }
 
-    // ----------------------------------------------------------
-    //                  GET /leaderboard
-    // ----------------------------------------------------------
     private void HandleLeaderboard(HttpRestEventArgs e)
     {
+        var list = _repo.GetLeaderboard()
+            .Select(x => new JsonObject
+            {
+                ["username"] = x.UserName,
+                ["ratingCount"] = x.RatingCount
+            })
+            .ToArray();
+
         e.RespondOk(new JsonObject
         {
             ["success"] = true,
-            ["leaderboard"] = "Leaderboard data (placeholder)."
+            ["leaderboard"] = new JsonArray(list)
         });
     }
+
 }

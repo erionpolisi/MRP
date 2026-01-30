@@ -8,6 +8,8 @@ namespace MRP.Handlers;
 
 public sealed class MediaHandler : Handler, IHandler
 {
+    private static readonly MediaEntryRepository _mediaRepo = new();
+
     public override void Handle(HttpRestEventArgs e)
     {
         if (!e.Path.StartsWith("/media"))
@@ -159,29 +161,60 @@ public sealed class MediaHandler : Handler, IHandler
     // ----------------------------------------------------------
     //                  GET /media
     // ----------------------------------------------------------
+    // ----------------------------------------------------------
+    //                  GET /media  (Search / Filter / Sort)
+    // ----------------------------------------------------------
     private void HandleList(HttpRestEventArgs e)
     {
-        var titleQuery =
-            (e.Query.TryGetValue("title", out var t) ? t : "")
-            ?.ToLowerInvariant() ?? "";
+        var q = e.Query;
 
-        var list = MediaEntry.All()
-            .Where(m => m.Title.ToLowerInvariant().Contains(titleQuery))
+        q.TryGetValue("search", out var search);
+        q.TryGetValue("genre", out var genre);
+        q.TryGetValue("sort", out var sort);
+
+        MediaEntry.MediaType? type = null;
+        if (q.TryGetValue("type", out var t) &&
+            Enum.TryParse<MediaEntry.MediaType>(t, true, out var parsed))
+        {
+            type = parsed;
+        }
+
+        int? year = q.TryGetValue("year", out var y) && int.TryParse(y, out var yi)
+            ? yi : null;
+
+        int? age = q.TryGetValue("age", out var a) && int.TryParse(a, out var ai)
+            ? ai : null;
+
+        double? minRating = q.TryGetValue("minRating", out var r) && double.TryParse(r, out var ri)
+            ? ri : null;
+
+        var result = _mediaRepo.Search(
+                search,
+                genre,
+                type,
+                year,
+                age,
+                minRating,
+                sort
+            )
             .Select(m => new JsonObject
             {
                 ["id"] = m.Id.ToString(),
                 ["title"] = m.Title,
                 ["type"] = m.Type.ToString(),
-                ["score"] = m.AverageScore
+                ["year"] = m.ReleaseYear,
+                ["avgScore"] = m.AverageScore
             })
             .ToArray();
 
         e.RespondOk(new JsonObject
         {
             ["success"] = true,
-            ["media"] = new JsonArray(list)
+            ["count"] = result.Length,
+            ["media"] = new JsonArray(result)
         });
     }
+
 
     private void HandleRatingsMedia(HttpRestEventArgs e, MediaEntry media)
     {

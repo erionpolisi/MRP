@@ -123,14 +123,163 @@ public sealed class MediaEntryRepository
         cmd.ExecuteNonQuery();
     }
 
-
-
     public override void Delete(MediaEntry obj)
     {
         using var cmd = _Cn.CreateCommand();
         cmd.CommandText = "DELETE FROM media_entries WHERE id = :id";
         cmd.BindParam(":id", obj.Id);
         cmd.ExecuteNonQuery();
+    }
+
+    public IEnumerable<MediaEntry> RecommendByGenre(string username)
+    {
+        using IDbCommand cmd = _Cn.CreateCommand();
+        cmd.CommandText = """
+                              SELECT DISTINCT m.id, m.title, m.description, m.type,
+                                     m.release_year, m.age_restriction,
+                                     m.genres, m.created_at,
+                                     m.creator_id,
+                                     u.username AS creator_username,
+                                     COALESCE(AVG(r2.stars), 0) AS avg_score
+                              FROM media_entries m
+                              JOIN users u ON u.id = m.creator_id
+                              LEFT JOIN ratings r2 ON r2.media_id = m.id
+                              WHERE m.id NOT IN (
+                                  SELECT media_id FROM ratings WHERE username = :u
+                              )
+                              AND EXISTS (
+                                  SELECT 1
+                                  FROM ratings r
+                                  JOIN media_entries rm ON rm.id = r.media_id
+                                  WHERE r.username = :u
+                                    AND r.stars >= 4
+                                    AND rm.genres && m.genres
+                              )
+                              GROUP BY m.id, u.username
+                              ORDER BY avg_score DESC
+                          """;
+
+        cmd.BindParam(":u", username);
+
+        using IDataReader re = cmd.ExecuteReader();
+        while (re.Read())
+            yield return _CreateObject(re);
+    }
+
+    public IEnumerable<MediaEntry> RecommendByContent(string username)
+    {
+        using IDbCommand cmd = _Cn.CreateCommand();
+        cmd.CommandText = """
+                              SELECT DISTINCT m.id, m.title, m.description, m.type,
+                                     m.release_year, m.age_restriction,
+                                     m.genres, m.created_at,
+                                     m.creator_id,
+                                     u.username AS creator_username,
+                                     COALESCE(AVG(r2.stars), 0) AS avg_score
+                              FROM media_entries m
+                              JOIN users u ON u.id = m.creator_id
+                              LEFT JOIN ratings r2 ON r2.media_id = m.id
+                              WHERE m.id NOT IN (
+                                  SELECT media_id FROM ratings WHERE username = :u
+                              )
+                              AND EXISTS (
+                                  SELECT 1
+                                  FROM ratings r
+                                  JOIN media_entries rm ON rm.id = r.media_id
+                                  WHERE r.username = :u
+                                    AND r.stars >= 4
+                                    AND rm.type = m.type
+                                    AND rm.age_restriction = m.age_restriction
+                                    AND rm.genres && m.genres
+                              )
+                              GROUP BY m.id, u.username
+                              ORDER BY avg_score DESC
+                          """;
+
+        cmd.BindParam(":u", username);
+
+        using IDataReader re = cmd.ExecuteReader();
+        while (re.Read())
+            yield return _CreateObject(re);
+    }
+
+    public IEnumerable<MediaEntry> Search(
+    string? search,
+    string? genre,
+    MediaEntry.MediaType? type,
+    int? releaseYear,
+    int? ageRestriction,
+    double? minRating,
+    string? sort
+)
+    {
+        var conditions = new List<string>();
+        var orderBy = "m.title ASC";
+
+        using IDbCommand cmd = _Cn.CreateCommand();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            conditions.Add("LOWER(m.title) LIKE LOWER(:search)");
+            cmd.BindParam(":search", $"%{search}%");
+        }
+
+        if (!string.IsNullOrWhiteSpace(genre))
+        {
+            conditions.Add(":genre = ANY(m.genres)");
+            cmd.BindParam(":genre", genre);
+        }
+
+        if (type.HasValue)
+        {
+            conditions.Add("m.type = :type");
+            cmd.BindParam(":type", (int)type.Value);
+        }
+
+        if (releaseYear.HasValue)
+        {
+            conditions.Add("m.release_year = :year");
+            cmd.BindParam(":year", releaseYear.Value);
+        }
+
+        if (ageRestriction.HasValue)
+        {
+            conditions.Add("m.age_restriction <= :age");
+            cmd.BindParam(":age", ageRestriction.Value);
+        }
+
+        if (minRating.HasValue)
+        {
+            conditions.Add("COALESCE(AVG(r.stars),0) >= :rating");
+            cmd.BindParam(":rating", minRating.Value);
+        }
+
+        if (sort == "year") orderBy = "m.release_year DESC";
+        else if (sort == "score") orderBy = "avg_score DESC";
+
+        var where = conditions.Count > 0
+            ? "WHERE " + string.Join(" AND ", conditions)
+            : string.Empty;
+
+        cmd.CommandText = $"""
+        SELECT
+            m.id, m.title, m.description, m.type,
+            m.release_year, m.age_restriction,
+            m.genres, m.created_at,
+            m.creator_id,
+            u.username AS creator_username,
+            COALESCE(AVG(r.stars), 0) AS avg_score
+        FROM media_entries m
+        JOIN users u ON u.id = m.creator_id
+        LEFT JOIN ratings r ON r.media_id = m.id
+        {where}
+        GROUP BY m.id, u.username
+        ORDER BY {orderBy}
+    """;
+
+        using IDataReader re = cmd.ExecuteReader();
+        while (re.Read())
+            yield return _CreateObject(re);
     }
 
 }
