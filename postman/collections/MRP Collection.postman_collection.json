@@ -633,59 +633,6 @@
           "response": []
         },
         {
-          "name": "Search Media by Title",
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "id": "5208bc08-070b-4f32-b1a0-2665749a14c4",
-                "exec": [
-                  ""
-                ],
-                "type": "text/javascript"
-              }
-            },
-            {
-              "listen": "test",
-              "script": {
-                "id": "fe6cd0b4-a0df-45cf-ace3-7863ea58cc6e",
-                "exec": [
-                  "pm.test(\"Successful GET request\", function () {\r",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "id": "463eafb4-1c33-45c6-bdd5-fd6d51e40e6c",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseURL}}/media?title={{searchTitle}}",
-              "host": [
-                "{{baseURL}}"
-              ],
-              "path": [
-                "media"
-              ],
-              "query": [
-                {
-                  "key": "title",
-                  "value": "{{searchTitle}}"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "Update Media",
           "event": [
             {
@@ -962,6 +909,37 @@
         },
         {
           "name": "Rate Media",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "2ffdba0e-4c54-4065-9275-1b6d4575a800",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "cd541af2-499c-49ab-a365-8b4cf32e54fa",
+                "exec": [
+                  "pm.test(\"Successful POST request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 409]);\r",
+                  "});\r",
+                  "\r",
+                  "var json = pm.response.json();\r",
+                  "if (json.ratingId) pm.environment.set(\"ratingId\", json.ratingId);"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
           "id": "42f0fa72-49b0-402f-8d72-78353e0b6ef6",
           "request": {
             "method": "POST",
@@ -1031,6 +1009,354 @@
               "path": [
                 "media",
                 "{{mediaId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All Media Entries (title)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "3081274d-8e58-4c73-8551-ea8a5ae93c07",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "661f2d70-9321-4502-8fc2-e41acbff1441",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "7e7ba349-e611-4b23-9ea2-910207957fc3",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/media?search=godfather",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "media"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "godfather",
+                  "uuid": "e521601c-5867-4a0f-80ae-cf963cfe5942"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All Media Entries (genre)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "3081274d-8e58-4c73-8551-ea8a5ae93c07",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "661f2d70-9321-4502-8fc2-e41acbff1441",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "30755842-bf2c-4743-bcdc-fe3954dc88c5",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/media?search=godfather",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "media"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "godfather",
+                  "uuid": "e521601c-5867-4a0f-80ae-cf963cfe5942"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All Media Entries (year)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "3081274d-8e58-4c73-8551-ea8a5ae93c07",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "661f2d70-9321-4502-8fc2-e41acbff1441",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "5d71d396-0fd3-4046-bd3c-954916da7e5e",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/media?year=1974",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "media"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "1974",
+                  "uuid": "cc1db6c3-ab73-4b92-8b91-7afb9b1fdf6c"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All Media Entries (age)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "3081274d-8e58-4c73-8551-ea8a5ae93c07",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "661f2d70-9321-4502-8fc2-e41acbff1441",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "e5f86dbe-3d69-4a91-bbbe-021c1adb3a65",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/media?age=16",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "media"
+              ],
+              "query": [
+                {
+                  "key": "age",
+                  "value": "16",
+                  "uuid": "43b0248b-9d8e-4af6-b315-30e4ba8f4bdd"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All Media Entries (sort)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "3081274d-8e58-4c73-8551-ea8a5ae93c07",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "661f2d70-9321-4502-8fc2-e41acbff1441",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "0c9bcb50-fbf3-449f-b814-98d155b4e849",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/media?age=16",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "media"
+              ],
+              "query": [
+                {
+                  "key": "age",
+                  "value": "16",
+                  "uuid": "43b0248b-9d8e-4af6-b315-30e4ba8f4bdd"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List All Media Entries (sort) Copy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "3081274d-8e58-4c73-8551-ea8a5ae93c07",
+                "exec": [
+                  "pm.test(\"Successful GET request\", function () {\r",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "661f2d70-9321-4502-8fc2-e41acbff1441",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "4a2ed8bc-8784-44b9-87c7-6169985c5cfc",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseURL}}/media?age=16",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "media"
+              ],
+              "query": [
+                {
+                  "key": "age",
+                  "value": "16",
+                  "uuid": "43b0248b-9d8e-4af6-b315-30e4ba8f4bdd"
+                }
               ]
             }
           },
