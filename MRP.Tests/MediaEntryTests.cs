@@ -32,4 +32,19 @@ public class MediaEntryTests
         media.Type = MediaEntry.MediaType.Movie;
         Assert.Equal(MediaEntry.MediaType.Movie, media.Type);
     }
+
+    [Fact]
+    public void MediaEntry_GenresMaintainInsertionOrder()
+    {
+        var media = new MediaEntry();
+
+        media.Genres.Add("Action");
+        media.Genres.Add("Drama");
+        media.Genres.Add("Sci-Fi");
+
+        Assert.Equal(3, media.Genres.Count);
+        Assert.Equal("Action", media.Genres[0]);
+        Assert.Equal("Drama", media.Genres[1]);
+        Assert.Equal("Sci-Fi", media.Genres[2]);
+    }
 }

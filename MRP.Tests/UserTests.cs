@@ -49,4 +49,29 @@ public class UserTests
         user.SetPassword("pw");
         Assert.NotNull(((__IAuthentificable)user).__PasswordHash);
     }
+
+    [Fact]
+    public void ChangingPassword_ChangesPasswordHash()
+    {
+        var user = new User();
+        user.UserName = "test";
+
+        user.SetPassword("pw1");
+        var hash1 = ((__IAuthentificable)user).__PasswordHash;
+
+        user.SetPassword("pw2");
+        var hash2 = ((__IAuthentificable)user).__PasswordHash;
+
+        Assert.NotEqual(hash1, hash2);
+    }
+
+    [Fact]
+    public void PasswordHash_DependsOnUsernameAndPassword()
+    {
+        var hash1 = User._HashPassword("user1", "pw");
+        var hash2 = User._HashPassword("user2", "pw");
+
+        Assert.NotEqual(hash1, hash2);
+    }
+
 }
